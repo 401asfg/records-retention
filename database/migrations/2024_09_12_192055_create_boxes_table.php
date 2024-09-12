@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->string('description');
             $table->date('destroy_date')->nullable();
-            $table->id('tracking_number')->nullable();  // FIXME: correct way to represent this?
+            $table->integer('tracking_number')->unsigned()->unique()->nullable();  // FIXME: correct way to represent this?
             $table->foreignId('retention_request_id')->constrained('retention_requests')->onDelete('cascade');
         });
     }
