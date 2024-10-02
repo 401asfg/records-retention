@@ -19,7 +19,7 @@ class DepartmentController extends Controller
 
         $query = $request->input('query');
         // FIXME: is this vulnerable to SQL injections?
-        $departments = Department::where('name', 'like', '%?%')->setBindings([$query])->get();
+        $departments = Department::where('name', 'like', '%' . $query . '%')->get();
         return DepartmentResource::collection($departments);
     }
 }

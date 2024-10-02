@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\RetentionRequestResource;
-use App\Http\Resources\BoxCollection;
 use App\Models\Box;
 use App\Models\RetentionRequest;
 use DB;
@@ -26,30 +24,29 @@ class RetentionRequestController extends Controller
             'retention_request.requestor_email' => 'required|email',
             // FIXME: should this have two seperate error messages?
             'retention_request.department_id' => 'required|exists:departments,id',
+            'boxes' => 'required|array|min:1',
             'boxes.*.description' => 'required|string',
             'boxes.*.destroy_date' => 'nullable|date'
         ]);
 
-        $retentionRequestResource = RetentionRequestResource::toArray($request->input('retention_request'));
-        $retentionRequest = RetentionRequest::create($retentionRequestResource);
-
         try {
             DB::beginTransaction();
 
-            $retentionRequestSaved = $retentionRequest->save();
+            $retentionRequest = RetentionRequest::create($request->input('retention_request'));
 
             // FIXME: should the exceptions be more specific subtypes?
-            if (!$retentionRequestSaved)
+            if (!$retentionRequest)
                 throw new Exeception('Failed to save a Retention Request');
 
-            $boxCollection = new BoxCollection($request->input('boxes'), $retentionRequest['id']);
+            $retentionRequestId = $retentionRequest['id'];
+            $boxesData = $request->input('boxes');
 
-            foreach ($boxCollection as $boxResource) {
-                $box = Box::create($boxResource);
-                $boxSaved = $box->save();
+            foreach ($boxesData as $boxData) {
+                $boxData['retention_request_id'] = $retentionRequestId;
+                $box = Box::create($boxData);
 
                 // FIXME: should the exceptions be more specific subtypes?
-                if (!$boxSaved)
+                if (!$box)
                     throw new Exception('Failed to save a Box');
             }
 

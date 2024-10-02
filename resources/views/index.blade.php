@@ -52,7 +52,7 @@
         <div class="row justify-content-center mt-3">
             <button type="button" id="add-box" class="rounded-circle" style="width: 40px; height: 40px;">+</button>
         </div>
-        <div class="row justify-content-center mt-5">
+        <div class="row justify-content-center mt-5 mb-5">
             <input type="submit" style="width: 100px; height: 40px;" />
         </div>
     </div>
