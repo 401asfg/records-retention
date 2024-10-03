@@ -12,7 +12,7 @@ class RetentionRequestController extends Controller
 {
     public function index(Request $request)
     {
-        return view('index');
+        return view('app');
     }
 
     public function store(Request $request)

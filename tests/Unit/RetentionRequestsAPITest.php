@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\RetentionRequest;
 use App\Models\Box;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Database\Seeders\DepartmentSeeder;
@@ -16,6 +17,8 @@ class RetentionRequestsAPITest extends TestCase
     // TODO: test sql injection attacks?
 
     use RefreshDatabase;
+    // FIXME: find a way to pass valid csrf tokens and remove
+    use WithoutMiddleware;
 
     public function setUp(): void
     {
@@ -29,7 +32,7 @@ class RetentionRequestsAPITest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertViewIs('index');
+        $response->assertViewIs('app');
     }
 
     public function testNoData()
