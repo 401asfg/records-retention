@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Box from "../Components/Box";
 import axios from 'axios';
 
@@ -13,7 +13,7 @@ const Form = () => {
     const [requestorName, setRequestorName] = useState("");
     const [requestorEmail, setRequestorEmail] = useState("");
 
-    const [nextBoxId, setNextBoxId] = useState(INIT_BOX_ID + 1);
+    const nextBoxId = useRef(INIT_BOX_ID + 1);
     const [boxes, setBoxes] = useState([{
         id: INIT_BOX_ID,
         description: "",
@@ -22,12 +22,12 @@ const Form = () => {
 
     const addBox = () => {
         setBoxes([...boxes, {
-            id: nextBoxId,
+            id: nextBoxId.current,
             description: "",
             destroyDate: ""
         }]);
 
-        setNextBoxId(nextBoxId + 1);
+        nextBoxId.current++;
     }
 
     const removeBox = (index) => {
