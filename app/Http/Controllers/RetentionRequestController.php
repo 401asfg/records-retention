@@ -61,7 +61,10 @@ class RetentionRequestController extends Controller
             ], 400);
         }
 
+        // TODO: email authorizors and admins (give people email opt-out option?) on successful submit (probably in the controller, pull emails from db)
+
         // FIXME: is this the correct way to respond?
+        // FIXME: create error page
         return response([
             'status' => 'success'
         ], 200);
