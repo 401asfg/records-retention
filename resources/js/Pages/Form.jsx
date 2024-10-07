@@ -20,6 +20,8 @@ const Form = () => {
         destroyDate: ""
     }]);
 
+    const [isInfoVisible, setInfoVisibility] = useState(false);
+
     const addBox = () => {
         setBoxes([...boxes, {
             id: nextBoxId.current,
@@ -60,6 +62,10 @@ const Form = () => {
         };
 
         setBox(index, newBox);
+    }
+
+    const toggleInfoVisibility = () => {
+        setInfoVisibility(!isInfoVisible);
     }
 
     const handleSubmit = async (event) => {
@@ -176,6 +182,21 @@ const Form = () => {
                     </div>
                 </div>
             </form>
+
+            {/* TODO: clicking outside of this div should cause it to minimize */}
+            <div className="fixed-bottom col-lg-3 col-md-4 col-6">
+                <div className="m-3">
+                    {isInfoVisible && (
+                        // TODO: replace info with actual info
+                        <div className="border mb-3 p-1" style={{background: "white"}}>Info</div>
+                    )}
+                    <button
+                        onClick={toggleInfoVisibility}
+                        className="rounded-circle"
+                        style={{width: "40px", height: "40px"}}
+                    >!</button>
+                </div>
+            </div>
         </div>
     );
 }
