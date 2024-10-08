@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import Box from "../Components/Box";
 import axios from 'axios';
 
+// TODO: test
 // FIXME: remember previous, non-box related, inputs
 
 const Form = () => {
@@ -92,7 +93,7 @@ const Form = () => {
     };
 
     return (
-        <div>
+        <div className="position-relative">
             <h1 className="text-center">Records Retention Form</h1>
             {/* FIXME: replace with actual info */}
             <h4 className="text-center">Info Header</h4>
@@ -184,11 +185,12 @@ const Form = () => {
             </form>
 
             {/* TODO: clicking outside of this div should cause it to minimize */}
-            <div className="fixed-bottom col-lg-3 col-md-4 col-6">
+            {/* FIXME: covers lots of space when info widget is open */}
+            <div className="position-fixed" style={{bottom: 0, left: 0}}>
                 <div className="m-3">
                     {isInfoVisible && (
                         // TODO: replace info with actual info
-                        <div className="border mb-3 p-1" style={{background: "white"}}>Info</div>
+                        <div className="border bg-light mb-3 p-1" style={{width: "250px"}}>Info</div>
                     )}
                     <button
                         onClick={toggleInfoVisibility}

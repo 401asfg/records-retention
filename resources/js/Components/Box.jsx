@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+// TODO: test
+
 const Box = (props) => {
     const FINAL_DISPOSITION_SHRED = "shred";
     const FINAL_DISPOSITION_PERMANENT_STORAGE = "permanent_storage";
