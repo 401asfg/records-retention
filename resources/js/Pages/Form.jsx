@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import Box from "../Components/Box";
+import SearchableDropdown from "../Components/SearchableDropdown";
 import axios from 'axios';
 
 // TODO: test
@@ -9,7 +10,7 @@ const Form = () => {
     const INIT_BOX_ID = 1;
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    const [departmentName, setDepartmentName] = useState("");
+    const [departmentId, setDepartmentId] = useState(null);
     const [managerName, setManagerName] = useState("");
     const [requestorName, setRequestorName] = useState("");
     const [requestorEmail, setRequestorEmail] = useState("");
@@ -77,8 +78,7 @@ const Form = () => {
                 "manager_name": managerName,
                 "requestor_name": requestorName,
                 "requestor_email": requestorEmail,
-                // FIXME: should use department id and not the name
-                "department_id": departmentName
+                "department_id": departmentId
             },
             "boxes": boxes.map((box) => { return {
                 "description": box.description,
@@ -102,8 +102,12 @@ const Form = () => {
                 <div className="row">
                     <div className="col-sm-6 col-12 mt-3">
                         <label htmlFor="department_name" className="row"><strong>Department Name</strong></label>
+                        <SearchableDropdown
+                            sourceRoute="departments"
+                            onOptionSelect={(event) => setDepartmentId(event.target.value)}
+                        />
                         {/* FIXME: should be searchable select */}
-                        <input
+                        {/* <input
                             type="text"
                             name="department_name"
                             id="department_name"
@@ -111,7 +115,7 @@ const Form = () => {
                             value={departmentName}
                             onChange={(event) => setDepartmentName(event.target.value)}
                             required
-                        />
+                        /> */}
                     </div>
                     <div className="col-sm-6 col-12 mt-3">
                         <label htmlFor="manager_name" className="row"><strong>Manager's Name</strong></label>
