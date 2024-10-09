@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Box;
 use App\Models\RetentionRequest;
-use DB;
-use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class RetentionRequestController extends Controller
@@ -36,7 +35,7 @@ class RetentionRequestController extends Controller
 
             // FIXME: should the exceptions be more specific subtypes?
             if (!$retentionRequest)
-                throw new Exeception('Failed to save a Retention Request');
+                throw new \Exception('Failed to save a Retention Request');
 
             $retentionRequestId = $retentionRequest['id'];
             $boxesData = $request->input('boxes');
@@ -47,7 +46,7 @@ class RetentionRequestController extends Controller
 
                 // FIXME: should the exceptions be more specific subtypes?
                 if (!$box)
-                    throw new Exception('Failed to save a Box');
+                    throw new \Exception('Failed to save a Box');
             }
 
             DB::commit();
