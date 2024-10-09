@@ -24,7 +24,7 @@ const SearchableDropdown = (props) => {
         const id = result.id;
         const name = result.name;
 
-        props.setOptionId(id);
+        props.setSelectedOptionId(id);
         setQuery(name);
         querySource(name);
     }
@@ -35,11 +35,11 @@ const SearchableDropdown = (props) => {
 
     const endSearch = () => {
         setIsDropdownOpen(false);
-        if (props.optionId === null) setQuery("");
+        if (props.selectedOptionId === null) setQuery("");
     }
 
     const search = async (query) => {
-        props.setOptionId(null);
+        props.setSelectedOptionId(null);
         setQuery(query);
         setDropdownOpenIfValidQuery(query);
         setIsLoading(true);

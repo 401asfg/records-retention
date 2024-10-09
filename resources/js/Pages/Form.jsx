@@ -106,8 +106,8 @@ const Form = () => {
                         <label htmlFor="department" className="row"><strong>Department</strong></label>
                         <SearchableDropdown
                             sourceRoute="departments"
-                            optionId={departmentId}
-                            setOptionId={setDepartmentId}
+                            selectedOptionId={departmentId}
+                            setSelectedOptionId={setDepartmentId}
                         />
                     </div>
                     <div className="col-sm-6 col-12 mt-3">
