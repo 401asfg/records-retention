@@ -101,7 +101,7 @@ const Form = () => {
             <form onSubmit={handleSubmit} className="container mt-4">
                 <div className="row">
                     <div className="col-sm-6 col-12 mt-3">
-                        <label htmlFor="department_name" className="row"><strong>Department Name</strong></label>
+                        <label htmlFor="department" className="row"><strong>Department</strong></label>
                         <SearchableDropdown
                             sourceRoute="departments"
                             optionId={departmentId}
