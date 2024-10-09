@@ -149,7 +149,7 @@ const Form = () => {
                 </div>
                 <div className="row mt-5 justify-content-center">
                     <h3 className="text-center">Boxes</h3>
-                    <div className="col-md-6 col-sm-11 col-9">
+                    <div className="col-lg-6 col-md-9 col-sm-11 col-9">
                         {boxes.map((box, i) =>
                             // FIXME: refactor into class?
                             <Box
