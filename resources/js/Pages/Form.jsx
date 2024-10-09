@@ -19,6 +19,7 @@ const Form = () => {
     const [boxes, setBoxes] = useState([{
         id: INIT_BOX_ID,
         description: "",
+        // FIXME: should this use null instead?
         destroyDate: ""
     }]);
 
@@ -28,6 +29,7 @@ const Form = () => {
         setBoxes([...boxes, {
             id: nextBoxId.current,
             description: "",
+            // FIXME: should this use null instead?
             destroyDate: ""
         }]);
 
