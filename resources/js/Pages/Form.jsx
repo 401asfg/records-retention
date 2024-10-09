@@ -104,18 +104,9 @@ const Form = () => {
                         <label htmlFor="department_name" className="row"><strong>Department Name</strong></label>
                         <SearchableDropdown
                             sourceRoute="departments"
-                            onOptionSelect={(event) => setDepartmentId(event.target.value)}
+                            optionId={departmentId}
+                            setOptionId={setDepartmentId}
                         />
-                        {/* FIXME: should be searchable select */}
-                        {/* <input
-                            type="text"
-                            name="department_name"
-                            id="department_name"
-                            className="w-100"
-                            value={departmentName}
-                            onChange={(event) => setDepartmentName(event.target.value)}
-                            required
-                        /> */}
                     </div>
                     <div className="col-sm-6 col-12 mt-3">
                         <label htmlFor="manager_name" className="row"><strong>Manager's Name</strong></label>
