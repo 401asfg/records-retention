@@ -133,14 +133,14 @@ class DepartmentsAPITest extends TestCase
 
     private function assertSearchSuccessful(string $query, array $expectedResult)
     {
-        $response = $this->get('departments?query=' . $query);
+        $response = $this->get('api/departments?query=' . $query);
         $response->assertStatus(200);
         $response->assertExactJson(['data' => $expectedResult]);
     }
 
     private function assertSearchValidationErrors(string $header, array $errors)
     {
-        $response = $this->get('departments' . $header);
+        $response = $this->get('api/departments' . $header);
         $response->assertStatus(302);
         $response->assertSessionHasErrors($errors);
     }

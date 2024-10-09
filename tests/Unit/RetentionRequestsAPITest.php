@@ -422,7 +422,7 @@ class RetentionRequestsAPITest extends TestCase
     private function assertPostValidationErrors(array $data, array $errors)
     {
 
-        $response = $this->post('retention-requests', $data);
+        $response = $this->post('api/retention-requests', $data);
         $response->assertStatus(302);
         $response->assertSessionHasErrors($errors);
     }
@@ -434,7 +434,7 @@ class RetentionRequestsAPITest extends TestCase
         if (!$validDepartmentId)
             $data['retention_request']['department_id']++;
 
-        $response = $this->post('retention-requests', $data);
+        $response = $this->post('api/retention-requests', $data);
         $response->assertStatus(200);
         $response->assertSessionDoesntHaveErrors();
 

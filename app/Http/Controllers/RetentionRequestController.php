@@ -9,11 +9,6 @@ use Illuminate\Http\Request;
 
 class RetentionRequestController extends Controller
 {
-    public function index(Request $request)
-    {
-        return view('app');
-    }
-
     public function store(Request $request)
     {
         // FIXME: does this return the correct response upon failure?

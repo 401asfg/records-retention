@@ -91,7 +91,7 @@ const Form = () => {
         axios.defaults.headers.common['X-CSRF-TOKEN'] = CSRF_TOKEN;
 
         // FIXME: handle failure cases
-        axios.post('retention-requests', data);
+        axios.post('api/retention-requests', data);
     };
 
     return (
@@ -105,7 +105,7 @@ const Form = () => {
                     <div className="col-sm-6 col-12 mt-3">
                         <label htmlFor="department" className="row"><strong>Department</strong></label>
                         <SearchableDropdown
-                            sourceRoute="departments"
+                            sourceRoute="api/departments"
                             selectedOptionId={departmentId}
                             setSelectedOptionId={setDepartmentId}
                         />

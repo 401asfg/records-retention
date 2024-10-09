@@ -3,6 +3,7 @@ import axios from 'axios';
 
 // TODO: test
 // TODO: add clear button?
+// TODO: take burden off server by querying all once on creation, then filtering results on client side for each query?
 
 const SearchableDropdown = (props) => {
     const [query, setQuery] = useState("");
