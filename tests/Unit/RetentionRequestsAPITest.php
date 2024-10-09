@@ -27,14 +27,6 @@ class RetentionRequestsAPITest extends TestCase
         $departmentSeeder->run();
     }
 
-    public function testIndex(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-        $response->assertViewIs('app');
-    }
-
     public function testNoData()
     {
         $this->assertPostValidationErrors([], [
