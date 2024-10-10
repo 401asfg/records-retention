@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from 'axios';
 
 // TODO: test
@@ -11,13 +11,15 @@ const SearchableDropdown = (props) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const querySource = async (query) => {
+    useEffect(() => {
         if (query.length === 0) return;
+        setIsLoading(true);
 
         // FIXME: handle failure case
-        const response = await axios.get(props.sourceRoute + "?query=" + query);
-        setResults(response.data.data);
-    }
+        axios.get(props.sourceRoute + "?query=" + query)
+            .then((res) => { setResults(res.data.data); })
+            .finally(() => { setIsLoading(false); });
+    }, [query]);
 
     const selectResult = (index) => {
         // FIXME: check for index out of bounds?
@@ -27,10 +29,9 @@ const SearchableDropdown = (props) => {
 
         props.setSelectedOptionId(id);
         setQuery(name);
-        querySource(name);
     }
 
-    const setDropdownOpenIfValidQuery = (query) => {
+    const setDropdownToOpenOnValidQuery = (query) => {
         setIsDropdownOpen(query.length !== 0);
     }
 
@@ -41,12 +42,8 @@ const SearchableDropdown = (props) => {
 
     const search = async (query) => {
         props.setSelectedOptionId(null);
+        setDropdownToOpenOnValidQuery(query);
         setQuery(query);
-        setDropdownOpenIfValidQuery(query);
-        setIsLoading(true);
-        // FIXME: make sure this doesn't cause blocking
-        await querySource(query);
-        setIsLoading(false);
     }
 
     const LoadingDropdownContent = () => {
@@ -90,7 +87,7 @@ const SearchableDropdown = (props) => {
                 placeholder="Search..."
                 className="w-100"
                 value={query}
-                onClick={(event) => setDropdownOpenIfValidQuery(event.target.value)}
+                onClick={(event) => setDropdownToOpenOnValidQuery(event.target.value)}
                 onBlur={endSearch}
                 onChange={(event) => search(event.target.value)}
                 required
