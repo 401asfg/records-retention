@@ -8,17 +8,17 @@ import axios from 'axios';
 const SearchableDropdown = (props) => {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isDropdownOpen, setDropdownOpen] = useState(false);
+    const [isLoading, setLoading] = useState(false);
 
     useEffect(() => {
         if (query.length === 0) return;
-        setIsLoading(true);
+        setLoading(true);
 
         // FIXME: handle failure case
         axios.get(props.sourceRoute + "?query=" + query)
             .then((res) => { setResults(res.data.data); })
-            .finally(() => { setIsLoading(false); });
+            .finally(() => { setLoading(false); });
     }, [query]);
 
     const selectResult = (index) => {
@@ -32,11 +32,11 @@ const SearchableDropdown = (props) => {
     }
 
     const setDropdownToOpenOnValidQuery = (query) => {
-        setIsDropdownOpen(query.length !== 0);
+        setDropdownOpen(query.length !== 0);
     }
 
     const endSearch = () => {
-        setIsDropdownOpen(false);
+        setDropdownOpen(false);
         if (props.selectedOptionId === null) setQuery("");
     }
 

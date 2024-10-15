@@ -24,7 +24,12 @@ const Form = () => {
         destroyDate: ""
     }]);
 
-    const [isInfoOpen, setIsInfoOpen] = useState(false);
+    const [isInfoOpen, setInfoOpen] = useState(false);
+    const [isConfirmationOpen, setConfirmationOpen] = useState(false);
+    const [isSubmissionSuccessfulOpen, setSubmissionSuccessfulOpen] = useState(false);
+
+    const [isSubmissionFailedOpen, setSubmissionFailedOpen] = useState(false);
+    const submissionFailedError = useRef("");
 
     const addBox = () => {
         setBoxes([...boxes, {
@@ -69,9 +74,7 @@ const Form = () => {
         setBox(index, newBox);
     }
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
+    const postRetentionRequest = () => {
         const data = {
             "retention_request": {
                 "manager_name": managerName,
@@ -87,11 +90,27 @@ const Form = () => {
 
         axios.defaults.headers.common['X-CSRF-TOKEN'] = CSRF_TOKEN;
 
-        // FIXME: handle failure cases
-        axios.post('api/retention-requests', data);
+        // TODO: test failure case
+        axios.post('api/retention-requests', data)
+            .then(() => { setSubmissionSuccessfulOpen(true) })
+            .catch((error) => {
+                submissionFailedError = error.message
+                setSubmissionFailedOpen(true);
+            });
+    }
+
+    const confirm = () => {
+        setConfirmationOpen(false);
+        postRetentionRequest();
+    }
+
+    const submit = async (event) => {
+        event.preventDefault();
+        setConfirmationOpen(true);
     };
 
     const Info = () => {
+        // TODO: replace info with actual info
         return (
             <div>
                 <div className="row text-center"><strong>Description Example</strong></div>
@@ -110,7 +129,7 @@ const Form = () => {
             {/* FIXME: replace with actual info */}
             <h4 className="text-center">Info Header</h4>
 
-            <form onSubmit={handleSubmit} className="container mt-4">
+            <form onSubmit={submit} className="container mt-4">
                 <div className="row">
                     <div className="col-sm-6 col-12 mt-3">
                         <label htmlFor="department" className="row"><strong>Department</strong></label>
@@ -165,7 +184,6 @@ const Form = () => {
                         <div className="col-lg-3 col-2">
                             <div style={{ position: "-webkit-sticky", position: "sticky", top: "20px" }}>
                                 <div className="row justify-content-center">
-                                    {/* TODO: replace info with actual info */}
                                     <div className="d-lg-block d-none">
                                         <div className="border bg-light p-2">
                                             <Info />
@@ -173,7 +191,7 @@ const Form = () => {
                                     </div>
                                     <button
                                         className="d-lg-none d-block"
-                                        onClick={() => setIsInfoOpen(true)}
+                                        onClick={() => setInfoOpen(true)}
                                         type="button"
                                         style={{width: "40px", height: "40px"}}
                                     >!</button>
@@ -182,7 +200,6 @@ const Form = () => {
                         </div>
                         <div className="col-lg-6 col-8">
                             {boxes.map((box, i) =>
-                                // FIXME: refactor into class?
                                 <Box
                                     key={box.id}
                                     box={box}
@@ -211,8 +228,26 @@ const Form = () => {
                 </div>
             </form>
 
-            <Modal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)}>
+            <Modal isOpen={isInfoOpen} onClose={() => setInfoOpen(false)}>
                 <Info />
+            </Modal>
+
+            <Modal isOpen={isConfirmationOpen} onClose={() => setConfirmationOpen(false)}>
+                <div className="container-fluid text-center">
+                    <div className="row justify-content-center mb-3">Are you sure you're ready to submit this retention request?</div>
+                    <div className="row justify-content-center">
+                        <button type="button" onClick={confirm} style={{width: "100px"}}>Submit</button>
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal isOpen={isSubmissionSuccessfulOpen} onClose={() => window.location.reload()}>
+                <div className="row justify-content-center text-center">Your retention request was successfully submitted for approval!</div>
+            </Modal>
+
+            <Modal isOpen={isSubmissionFailedOpen} onClose={() => setSubmissionFailedOpen(false)}>
+                <div className="row justify-content-center text-center">The following error prevented your retention request from being submitted:</div>
+                <div className="row justify-content-center text-center">{submissionFailedError}</div>
             </Modal>
         </div>
     );
