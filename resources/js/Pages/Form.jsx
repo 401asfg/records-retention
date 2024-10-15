@@ -5,6 +5,12 @@ import Modal from "../Components/Modal";
 import axios from 'axios';
 
 // TODO: test
+// TODO: change page title to retention record request form
+// TODO: add logo to top of form
+// TODO: add small version of logo as favicon
+// TODO: add 404 page?
+// FIXME: refactor styling?
+// TODO: use content management system?
 // FIXME: remember previous, non-box related, inputs
 
 const Form = () => {
@@ -110,26 +116,35 @@ const Form = () => {
     };
 
     const Info = () => {
-        // TODO: replace info with actual info
         return (
             <div>
-                <div className="row text-center"><strong>Description Example</strong></div>
-                <div>
-                    Info<br/>
-                    Info 2<br/>
-                    Info 3
-                </div>
+                <p className="text-center"><strong>Filling out Box Descriptions</strong></p>
+                <p>Include the following in your Description of the box contents:</p>
+                <ol>
+                    <li>Brief description of the records.</li>
+                    <li>Date ranges covered by the materials.</li>
+                    <li>The relevant Record Classification Number (if possible) from the <a href="https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Femployee.vcc.ca%2Fdepartments%2Foperational%2Frecords-management%2Frecords-retention-schedule%2Frecords-retention-schedule-rrs%2F&data=05%7C02%7Cmallan%40vcc.ca%7Cff4d15c23e4b488202e308dced51a45a%7C9d83cfc7633047d5b18d45bafe3b1d87%7C0%7C0%7C638646182108297053%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=OzCNo0i5GxUUJnj6UiE4q4I5OFIFez0uqaqXPJZiud8%3D&reserved=0">Records Retention Schedule</a>. This will determine the eventual destruction date.</li>
+                </ol>
+                <p className="fst-italic">For Example:</p>
+                <ul>
+                    <li>Student exams from Certified Dental Assisting, Jan-April 2023 term, TE-400</li>
+                    <li>Credit card receipts from DTN spa, Jan-Dec 2024, FI-40</li>
+                </ul>
+                <p>These details will determine the eventual destruction dates for this box. For these examples, the student exams must be kept for 2 years, so the destruction date will be May 2025; credit card receipts must be kept for 1 year, so the destruction date will be January 2025.</p>
             </div>
         );
     }
 
     return (
-        <div className="position-relative">
-            <h1 className="text-center">Records Retention Form</h1>
-            {/* FIXME: replace with actual info */}
-            <h4 className="text-center">Info Header</h4>
-
-            <form onSubmit={submit} className="container mt-4">
+        <div className="container position-relative">
+            <h1 className="text-center mt-3 mb-5">Records Retention Form</h1>
+            <div className="border border-dark p-2 mb-5">
+                <p>Submit this form to authorize and send boxes of physical records to store at VCC's Downtown campus. Boxes will be held until the end of their retention period and then destroyed. Records should only be sent if they are no longer regularly consulted in office; boxes can be retrieved (up until destruction) with a few days notice.</p>
+                <p>Consult the <a href="https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Femployee.vcc.ca%2Fdepartments%2Foperational%2Frecords-management%2Frecords-retention-schedule%2Frecords-retention-schedule-rrs%2F&data=05%7C02%7Cmallan%40vcc.ca%7Cff4d15c23e4b488202e308dced51a45a%7C9d83cfc7633047d5b18d45bafe3b1d87%7C0%7C0%7C638646182108195445%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=hVknz8R1Ol8kOR51MKdV4mITkfe6voY1ehnHEG%2Fb4uE%3D&reserved=0">Records Retention Schedule</a> to see when records may be destroyed. Please contact the <a href="https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Femployee.vcc.ca%2Fdepartments%2Foperational%2Frecords-management%2Fcontact-records-management%2F&data=05%7C02%7Cmallan%40vcc.ca%7Cff4d15c23e4b488202e308dced51a45a%7C9d83cfc7633047d5b18d45bafe3b1d87%7C0%7C0%7C638646182108241374%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=FTTGPn04zmxXnUD1rsNKdxJO5d3jexpr0QP8EBfzjnU%3D&reserved=0">Records Coordinator</a> if you have any questions.</p>
+                <p>Complete the fields below; the form will be submitted for review and approval. Multiple boxes can be submitted for approval with one form.</p>
+                <p>Once you receive an approved response, attach the form(s) to the box(es) of records and submit a <a href="https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Ffsr.vcc.ca%2F&data=05%7C02%7Cmallan%40vcc.ca%7Cff4d15c23e4b488202e308dced51a45a%7C9d83cfc7633047d5b18d45bafe3b1d87%7C0%7C0%7C638646182108269967%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=S99hSgPYXuGVofCb1hw0FFlIRv3TguyFzMhhK0VG7vc%3D&reserved=0">Facilities Service Request (FSR)</a> to have the boxes moved to Room 003 at DTN campus.</p>
+            </div>
+            <form onSubmit={submit} className="mt-4">
                 <div className="row">
                     <div className="col-sm-6 col-12 mt-3">
                         <label htmlFor="department" className="row"><strong>Department</strong></label>
@@ -208,16 +223,16 @@ const Form = () => {
                                     remove={i === 0 ? null : () => removeBox(i)}
                                 />
                             )}
+                            <div className="row justify-content-center">
+                                <button
+                                    onClick={addBox}
+                                    type="button"
+                                    id="add-box"
+                                    className="rounded-circle"
+                                    style={{width: "40px", height: "40px"}}
+                                >+</button>
+                            </div>
                         </div>
-                    </div>
-                    <div className="row justify-content-center">
-                        <button
-                            onClick={addBox}
-                            type="button"
-                            id="add-box"
-                            className="rounded-circle"
-                            style={{width: "40px", height: "40px"}}
-                        >+</button>
                     </div>
                     <div className="row justify-content-center mt-5 mb-5">
                         <input
