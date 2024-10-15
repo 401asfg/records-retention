@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import Box from "../Components/Box";
 import SearchableDropdown from "../Components/SearchableDropdown";
+import Modal from "../Components/Modal";
 import axios from 'axios';
 
 // TODO: test
@@ -23,7 +24,7 @@ const Form = () => {
         destroyDate: ""
     }]);
 
-    const [isInfoVisible, setInfoVisibility] = useState(false);
+    const [isInfoOpen, setIsInfoOpen] = useState(false);
 
     const addBox = () => {
         setBoxes([...boxes, {
@@ -68,10 +69,6 @@ const Form = () => {
         setBox(index, newBox);
     }
 
-    const toggleInfoVisibility = () => {
-        setInfoVisibility(!isInfoVisible);
-    }
-
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -93,6 +90,19 @@ const Form = () => {
         // FIXME: handle failure cases
         axios.post('api/retention-requests', data);
     };
+
+    const Info = () => {
+        return (
+            <div>
+                <div className="row text-center"><strong>Description Example</strong></div>
+                <div>
+                    Info<br/>
+                    Info 2<br/>
+                    Info 3
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="position-relative">
@@ -151,17 +161,37 @@ const Form = () => {
                 </div>
                 <div className="row mt-5 justify-content-center">
                     <h3 className="text-center">Boxes</h3>
-                    <div className="col-lg-6 col-md-9 col-sm-11 col-9">
-                        {boxes.map((box, i) =>
-                            // FIXME: refactor into class?
-                            <Box
-                                key={box.id}
-                                box={box}
-                                setDescription={(value) => setBoxDescription(i, value)}
-                                setDestroyDate={(value) => setBoxDestroyDate(i, value)}
-                                remove={i === 0 ? null : () => removeBox(i)}
-                            />
-                        )}
+                    <div className="row">
+                        <div className="col-lg-3 col-2">
+                            <div style={{ position: "-webkit-sticky", position: "sticky", top: "20px" }}>
+                                <div className="row justify-content-center">
+                                    {/* TODO: replace info with actual info */}
+                                    <div className="d-lg-block d-none">
+                                        <div className="border bg-light p-2">
+                                            <Info />
+                                        </div>
+                                    </div>
+                                    <button
+                                        className="d-lg-none d-block"
+                                        onClick={() => setIsInfoOpen(true)}
+                                        type="button"
+                                        style={{width: "40px", height: "40px"}}
+                                    >!</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-lg-6 col-8">
+                            {boxes.map((box, i) =>
+                                // FIXME: refactor into class?
+                                <Box
+                                    key={box.id}
+                                    box={box}
+                                    setDescription={(value) => setBoxDescription(i, value)}
+                                    setDestroyDate={(value) => setBoxDestroyDate(i, value)}
+                                    remove={i === 0 ? null : () => removeBox(i)}
+                                />
+                            )}
+                        </div>
                     </div>
                     <div className="row justify-content-center">
                         <button
@@ -181,21 +211,9 @@ const Form = () => {
                 </div>
             </form>
 
-            {/* TODO: clicking outside of this div should cause it to minimize */}
-            {/* FIXME: covers lots of space when info widget is open */}
-            <div className="position-fixed" style={{bottom: 0, left: 0}}>
-                <div className="m-3">
-                    {isInfoVisible && (
-                        // TODO: replace info with actual info
-                        <div className="border bg-light mb-3 p-1" style={{width: "250px"}}>Info</div>
-                    )}
-                    <button
-                        onClick={toggleInfoVisibility}
-                        className="rounded-circle"
-                        style={{width: "40px", height: "40px"}}
-                    >!</button>
-                </div>
-            </div>
+            <Modal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)}>
+                <Info />
+            </Modal>
         </div>
     );
 }

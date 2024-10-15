@@ -56,6 +56,7 @@ class RetentionRequestController extends Controller
         }
 
         // TODO: email authorizors and admins (give people email opt-out option?) on successful submit (probably in the controller, pull emails from db)
+        // TODO: email confirmation to requestor
 
         // FIXME: is this the correct way to respond?
         // FIXME: create error page
