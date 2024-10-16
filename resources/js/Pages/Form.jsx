@@ -229,7 +229,7 @@ const Form = () => {
                         </div>
                         <div className="col-lg-6 col-8">
                             {boxes.map((box, i) =>
-                                // FIXME: rerender box/boxes into class?
+                                // FIXME: refactor box/boxes into class?
                                 <Box
                                     key={box.id}
                                     box={box}
