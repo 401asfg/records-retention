@@ -3,8 +3,10 @@ import Box from "../Components/Box";
 import SearchableDropdown from "../Components/SearchableDropdown";
 import Modal from "../Components/Modal";
 import axios from 'axios';
+import { useCookies } from 'react-cookie';
 
 // TODO: test
+// TODO: test cookie system (make sure query is only used if there is a valid dept id and vice versa)
 // TODO: change page title to retention record request form
 // TODO: add logo to top of form
 // TODO: add small version of logo as favicon
@@ -16,11 +18,21 @@ import axios from 'axios';
 const Form = () => {
     const INIT_BOX_ID = 1;
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const COOKIE_OPTIONS = { maxAge: 60 * 60 * 24 * 14 };
 
-    const [departmentId, setDepartmentId] = useState(null);
-    const [managerName, setManagerName] = useState("");
-    const [requestorName, setRequestorName] = useState("");
-    const [requestorEmail, setRequestorEmail] = useState("");
+    const [cookies, setCookie] = useCookies(["manager_name", "requestor_name", "requestor_email", "department_id"]);
+
+    const [departmentId, setDepartmentId] = useState(cookies.department_id || null);
+    const [managerName, setManagerName] = useState(cookies.manager_name || "");
+    const [requestorName, setRequestorName] = useState(cookies.requestor_name || "");
+    const [requestorEmail, setRequestorEmail] = useState(cookies.requestor_email || "");
+
+    const [isInfoOpen, setInfoOpen] = useState(false);
+    const [isConfirmationOpen, setConfirmationOpen] = useState(false);
+    const [isSubmissionSuccessfulOpen, setSubmissionSuccessfulOpen] = useState(false);
+
+    const [isSubmissionFailedOpen, setSubmissionFailedOpen] = useState(false);
+    const submissionFailedError = useRef("");
 
     const nextBoxId = useRef(INIT_BOX_ID + 1);
     const [boxes, setBoxes] = useState([{
@@ -29,13 +41,6 @@ const Form = () => {
         // FIXME: should this use null instead?
         destroyDate: ""
     }]);
-
-    const [isInfoOpen, setInfoOpen] = useState(false);
-    const [isConfirmationOpen, setConfirmationOpen] = useState(false);
-    const [isSubmissionSuccessfulOpen, setSubmissionSuccessfulOpen] = useState(false);
-
-    const [isSubmissionFailedOpen, setSubmissionFailedOpen] = useState(false);
-    const submissionFailedError = useRef("");
 
     const addBox = () => {
         setBoxes([...boxes, {
@@ -107,6 +112,12 @@ const Form = () => {
 
     const confirm = () => {
         setConfirmationOpen(false);
+
+        setCookie("manager_name", managerName, COOKIE_OPTIONS);
+        setCookie("requestor_name", requestorName, COOKIE_OPTIONS);
+        setCookie("requestor_email", requestorEmail, COOKIE_OPTIONS);
+        setCookie("department_id", departmentId, COOKIE_OPTIONS);
+
         postRetentionRequest();
     }
 
@@ -149,9 +160,11 @@ const Form = () => {
                     <div className="col-sm-6 col-12 mt-3">
                         <label htmlFor="department" className="row"><strong>Department</strong></label>
                         <SearchableDropdown
+                            name="departments"
                             sourceRoute="api/departments"
                             selectedOptionId={departmentId}
                             setSelectedOptionId={setDepartmentId}
+                            cookieOptions={COOKIE_OPTIONS}
                         />
                     </div>
                     <div className="col-sm-6 col-12 mt-3">
@@ -256,7 +269,8 @@ const Form = () => {
                 </div>
             </Modal>
 
-            <Modal isOpen={isSubmissionSuccessfulOpen} onClose={() => window.location.reload()}>
+            {/* TODO: have the page refresh on close? */}
+            <Modal isOpen={isSubmissionSuccessfulOpen} onClose={() => setSubmissionSuccessfulOpen(false)}>
                 <div className="row justify-content-center text-center">Your retention request was successfully submitted for approval!</div>
             </Modal>
 
