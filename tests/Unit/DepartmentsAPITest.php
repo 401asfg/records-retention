@@ -127,7 +127,7 @@ class DepartmentsAPITest extends TestCase
 
     public function testIndexImmuneToSqlInjectionAttack()
     {
-        // FIXME: is this correct
+        // FIXME: is this correct?
         $this->assertSearchSuccessful("x' or name like '", []);
     }
 

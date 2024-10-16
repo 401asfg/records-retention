@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 
+// TODO: test
+
 const Modal = (props) => {
     if (!props.isOpen) return null;
 

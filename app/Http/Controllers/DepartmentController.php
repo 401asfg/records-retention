@@ -12,7 +12,6 @@ class DepartmentController extends Controller
 {
     public function index(Request $request)
     {
-        // FIXME: does this return the correct response upon failure?
         $request->validate([
             'query' => 'required|string'
         ]);

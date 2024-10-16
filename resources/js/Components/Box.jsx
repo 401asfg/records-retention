@@ -55,7 +55,6 @@ const Box = (props) => {
                             /> Permanent Storage
                         </label>
                     </div>
-                    {/* FIXME: this isn't reactivated if user switches back to the shred fd */}
                     {(finalDisposition === FINAL_DISPOSITION_SHRED) && (
                         <div className="col-lg-6 col-12 mt-1">
                             <div className="row">

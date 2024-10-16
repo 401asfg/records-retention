@@ -9,14 +9,14 @@ use Illuminate\Http\Request;
 
 class RetentionRequestController extends Controller
 {
+    // TODO: test that all admins and authorizors that haven't opted out of receiving emails get sent emails
+
     public function store(Request $request)
     {
-        // FIXME: does this return the correct response upon failure?
         $request->validate([
             'retention_request.manager_name' => 'required|string',
             'retention_request.requestor_name' => 'required|string',
             'retention_request.requestor_email' => 'required|email',
-            // FIXME: should this have two seperate error messages?
             'retention_request.department_id' => 'required|exists:departments,id',
             'boxes' => 'required|array|min:1',
             'boxes.*.description' => 'required|string',
