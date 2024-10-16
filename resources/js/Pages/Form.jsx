@@ -11,6 +11,7 @@ import { useCookies } from 'react-cookie';
 // TODO: add logo to top of form
 // TODO: add small version of logo as favicon
 // TODO: add 404 page?
+// FIXME: will the page be rerendered on changing the fields even without cookies having dependencies?
 // FIXME: refactor styling?
 // TODO: use content management system?
 // FIXME: remember previous, non-box related, inputs
