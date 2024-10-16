@@ -20,7 +20,7 @@ const Form = () => {
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const COOKIE_OPTIONS = { maxAge: 60 * 60 * 24 * 14 };
 
-    const [cookies, setCookie] = useCookies(["manager_name", "requestor_name", "requestor_email", "department_id"]);
+    const [cookies, setCookie] = useCookies();
 
     const [departmentId, setDepartmentId] = useState(cookies.department_id || null);
     const [managerName, setManagerName] = useState(cookies.manager_name || "");

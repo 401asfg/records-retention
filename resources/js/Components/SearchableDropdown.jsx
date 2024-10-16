@@ -10,7 +10,7 @@ import { useCookies } from 'react-cookie';
 const SearchableDropdown = (props) => {
     const COOKIE_NAME = props.name + "_query";
 
-    const [cookies, setCookie] = useCookies([COOKIE_NAME]);
+    const [cookies, setCookie] = useCookies();
 
     const [query, setQuery] = useState(props.selectedOptionId === null ? "" : (cookies[COOKIE_NAME] || ""));
     const [results, setResults] = useState([]);
