@@ -52,8 +52,6 @@ class RetentionRequestController extends Controller
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
-
-            // FIXME: is this the correct way to respond?
             return response($exception->getMessage(), 400)->header('Content-Type', 'text/plain');
         }
 
@@ -66,7 +64,6 @@ class RetentionRequestController extends Controller
             $this::getUserMailingList()
         );
 
-        // FIXME: is this the correct way to respond?
         // FIXME: create error page
         return response(['status' => 'success'], 200);
     }
@@ -102,7 +99,6 @@ class RetentionRequestController extends Controller
             ->whereIn("roles.name", ["Admin", "Authorizer"])
             ->get();
 
-        // FIXME: necessary?
         return $users->map(function ($user) {
             return ["name" => (string) $user->name, "email" => (string) $user->email];
         });

@@ -28,7 +28,8 @@ const SearchableDropdown = (props) => {
     }, [query]);
 
     const selectResult = (index) => {
-        // FIXME: check for index out of bounds?
+        if (index < 0 || index >= results.length) return;
+
         const result = results[index];
         const id = result.id;
         const name = result.name;

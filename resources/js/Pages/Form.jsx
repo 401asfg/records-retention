@@ -10,13 +10,9 @@ import logo from "../../../public/logo.png";
 // TODO: test
 // TODO: test cookie system (make sure query is only used if there is a valid dept id and vice versa)
 // TODO: change page title to retention record request form
-// TODO: add logo to top of form
-// TODO: add small version of logo as favicon
 // TODO: add 404 page?
-// FIXME: will the page be rerendered on changing the fields even without cookies having dependencies?
 // FIXME: refactor styling?
 // TODO: use content management system?
-// FIXME: remember previous, non-box related, inputs
 
 const Form = () => {
     const INIT_BOX_ID = 1;

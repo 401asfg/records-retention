@@ -10,7 +10,6 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        // FIXME: readd password_reset_tokens and sessions?
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
