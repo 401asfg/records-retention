@@ -269,9 +269,9 @@ const Form = () => {
 
             <Modal isOpen={isConfirmationOpen} onClose={() => setConfirmationOpen(false)}>
                 <div className="container-fluid text-center">
-                    <div className="row justify-content-center mb-3">Are you sure you're ready to submit this retention request?</div>
-                    <div className="row justify-content-center">
-                        <button type="button" onClick={confirm} style={{width: "100px"}}>Submit</button>
+                    <div className="row justify-content-center">Are you sure you're ready to submit this retention request?</div>
+                    <div className="row justify-content-center mt-3">
+                        <button type="button" onClick={confirm} style={{width: "100px"}}>Confirm</button>
                     </div>
                 </div>
             </Modal>
@@ -279,11 +279,17 @@ const Form = () => {
             {/* TODO: have the page refresh on close? */}
             <Modal isOpen={isSubmissionSuccessfulOpen} onClose={() => setSubmissionSuccessfulOpen(false)}>
                 <div className="row justify-content-center text-center">Your retention request was successfully submitted for approval!</div>
+                <div className="row justify-content-center mt-3">
+                    <button type="button" onClick={() => setSubmissionSuccessfulOpen(false)} style={{width: "100px"}}>Okay</button>
+                </div>
             </Modal>
 
             <Modal isOpen={isSubmissionFailedOpen} onClose={() => setSubmissionFailedOpen(false)}>
                 <div className="row justify-content-center text-center">The following error prevented your retention request from being submitted:</div>
                 <div className="row justify-content-center text-center">{submissionFailedError.current}</div>
+                <div className="row justify-content-center mt-3">
+                    <button type="button" onClick={() => setSubmissionFailedOpen(false)} style={{width: "100px"}}>Okay</button>
+                </div>
             </Modal>
         </div>
     );
