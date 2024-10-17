@@ -1,9 +1,11 @@
 import { useState, useRef } from "react";
+import axios from 'axios';
+import { useCookies } from 'react-cookie';
+
 import Box from "../Components/Box";
 import SearchableDropdown from "../Components/SearchableDropdown";
 import Modal from "../Components/Modal";
-import axios from 'axios';
-import { useCookies } from 'react-cookie';
+import logo from "../../../public/logo.png";
 
 // TODO: test
 // TODO: test cookie system (make sure query is only used if there is a valid dept id and vice versa)
@@ -149,6 +151,9 @@ const Form = () => {
 
     return (
         <div className="container position-relative">
+            <a href="https://library.vcc.ca/" className="row justify-content-center pt-2">
+                <img src={logo} alt="Logo" style={{width: "200px", height: "auto"}}></img>
+            </a>
             <h1 className="text-center mt-3 mb-5">Records Retention Form</h1>
             <div className="border border-dark p-2 mb-5">
                 <p>Submit this form to authorize and send boxes of physical records to store at VCC's Downtown campus. Boxes will be held until the end of their retention period and then destroyed. Records should only be sent if they are no longer regularly consulted in office; boxes can be retrieved (up until destruction) with a few days notice.</p>
@@ -247,13 +252,13 @@ const Form = () => {
                                     style={{width: "40px", height: "40px"}}
                                 >+</button>
                             </div>
+                            <div className="row justify-content-center mt-5 mb-5">
+                                <input
+                                    type="submit"
+                                    style={{width: "100px", height: "40px"}}
+                                />
+                            </div>
                         </div>
-                    </div>
-                    <div className="row justify-content-center mt-5 mb-5">
-                        <input
-                            type="submit"
-                            style={{width: "100px", height: "40px"}}
-                        />
                     </div>
                 </div>
             </form>
