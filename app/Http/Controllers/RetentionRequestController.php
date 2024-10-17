@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PendingRecordRetentionRequest;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RetentionRequestSuccessfullySubmitted;
 use App\Models\Box;
 use App\Models\RetentionRequest;
 use Illuminate\Foundation\Auth\User;
@@ -11,6 +14,7 @@ use Illuminate\Http\Request;
 class RetentionRequestController extends Controller
 {
     // TODO: test that all admins and authorizors that haven't opted out of receiving emails get sent emails
+    // TODO: test that the requestor recieves their email
 
     public function store(Request $request)
     {
@@ -50,42 +54,57 @@ class RetentionRequestController extends Controller
             DB::rollBack();
 
             // FIXME: is this the correct way to respond?
-            return response([
-                'message' => $exception->getMessage(),
-                'status' => 'failed'
-            ], 400);
+            return response($exception->getMessage(), 400)->header('Content-Type', 'text/plain');
         }
 
-        // TODO: email authorizors and admins (give people email opt-out option?) on successful submit (probably in the controller, pull emails from db)
-        // TODO: email confirmation to requestor
-
-        $emails = $this::getMailingList();
-        dd($emails);
+        // FIXME: should this be moved inside the try block so it fails loudly?
+        $this::emailInvolvedParties(
+            [
+                "name" => $retentionRequest["requestor_name"],
+                "email" => $retentionRequest["requestor_email"]
+            ],
+            $this::getUserMailingList()
+        );
 
         // FIXME: is this the correct way to respond?
         // FIXME: create error page
-        return response([
-            'status' => 'success'
-        ], 200);
+        return response(['status' => 'success'], 200);
+    }
+
+    // FIXME: handle failure case
+    private static function emailInvolvedParties($requestor, $authorizers)
+    {
+        $requestorName = $requestor['name'];
+        $requestorEmail = $requestor['email'];
+
+        Mail::to($requestorEmail)->send(new RetentionRequestSuccessfullySubmitted([
+            "name" => $requestorName
+        ]));
+
+        foreach ($authorizers as $authorizer) {
+            Mail::to($authorizer['email'])->send(new PendingRecordRetentionRequest([
+                "authorizer_name" => $authorizer['name'],
+                "requestor_name" => $requestorName,
+                "requestor_email" => $requestorEmail,
+            ]));
+        }
     }
 
     // FIXME: refactor to get email from external database?
-    private static function getMailingList()
+    // FIXME: handle failure case
+    private static function getUserMailingList()
     {
         // FIXME: need to modify users and roles tables to match this specification
         $users = DB::table('users')
+            ->select(['users.name AS name', 'users.email AS email'])
             ->join('roles', 'users.role_id', '=', 'roles.id')
-            ->select('users.email AS email')
-            ->where([
-                ['roles.name', 'in', '(Admin, Authorizer)'],
-                ['users.is_receiving_emails', '=', 'true']
-            ])
+            ->where("users.is_receiving_emails", "=", 1)
+            ->whereIn("roles.name", ["Admin", "Authorizer"])
             ->get();
 
-        $emails = $users->flatMap(function ($user) {
-            return $user->email;
+        // FIXME: necessary?
+        return $users->map(function ($user) {
+            return ["name" => (string) $user->name, "email" => (string) $user->email];
         });
-
-        return $emails;
     }
 }

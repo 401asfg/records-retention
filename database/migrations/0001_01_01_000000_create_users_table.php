@@ -10,15 +10,14 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {   // FIXME: remove some fields?
+        // FIXME: readd password_reset_tokens and sessions?
+        Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->timestamps();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->foreignId('role_id')->constrained('roles');   // FIXME: setup on delete clause?
-            $table->rememberToken();
-            $table->timestamps();
+            $table->boolean('is_receiving_emails')->default(true);
+            $table->foreignId('role_id')->constrained('roles');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {   // FIXME: remove?
@@ -43,7 +42,5 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
     }
 };

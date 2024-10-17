@@ -106,7 +106,7 @@ const Form = () => {
         axios.post('api/retention-requests', data)
             .then(() => { setSubmissionSuccessfulOpen(true) })
             .catch((error) => {
-                submissionFailedError = error.message
+                submissionFailedError.current = error.response.data;
                 setSubmissionFailedOpen(true);
             });
     }
@@ -278,7 +278,7 @@ const Form = () => {
 
             <Modal isOpen={isSubmissionFailedOpen} onClose={() => setSubmissionFailedOpen(false)}>
                 <div className="row justify-content-center text-center">The following error prevented your retention request from being submitted:</div>
-                <div className="row justify-content-center text-center">{submissionFailedError}</div>
+                <div className="row justify-content-center text-center">{submissionFailedError.current}</div>
             </Modal>
         </div>
     );
