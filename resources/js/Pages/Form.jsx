@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
@@ -9,7 +9,6 @@ import logo from "../../../public/logo.png";
 
 // TODO: test
 // TODO: test cookie system (make sure query is only used if there is a valid dept id and vice versa)
-// TODO: change page title to retention record request form
 // TODO: add 404 page?
 // FIXME: refactor styling?
 // TODO: use content management system?
@@ -40,6 +39,10 @@ const Form = () => {
         // FIXME: should this use null instead?
         destroyDate: ""
     }]);
+
+    useEffect(() => {
+        document.title = "Records Retention Form"
+    }, []);
 
     const addBox = () => {
         setBoxes([...boxes, {

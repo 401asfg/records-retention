@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // TODO: need to create 6 test accounts (admin, authorizer, viewer; one of each for receiving emails and not receiving emails)
+        // FIXME: should these accounts be specified in the .env?
 
         User::create([
             "name" => "Viewer Receiving Emails",
