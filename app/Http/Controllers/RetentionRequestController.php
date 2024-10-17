@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Box;
 use App\Models\RetentionRequest;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -58,10 +59,33 @@ class RetentionRequestController extends Controller
         // TODO: email authorizors and admins (give people email opt-out option?) on successful submit (probably in the controller, pull emails from db)
         // TODO: email confirmation to requestor
 
+        $emails = $this::getMailingList();
+        dd($emails);
+
         // FIXME: is this the correct way to respond?
         // FIXME: create error page
         return response([
             'status' => 'success'
         ], 200);
+    }
+
+    // FIXME: refactor to get email from external database?
+    private static function getMailingList()
+    {
+        // FIXME: need to modify users and roles tables to match this specification
+        $users = DB::table('users')
+            ->join('roles', 'users.role_id', '=', 'roles.id')
+            ->select('users.email AS email')
+            ->where([
+                ['roles.name', 'in', '(Admin, Authorizer)'],
+                ['users.is_receiving_emails', '=', 'true']
+            ])
+            ->get();
+
+        $emails = $users->flatMap(function ($user) {
+            return $user->email;
+        });
+
+        return $emails;
     }
 }
