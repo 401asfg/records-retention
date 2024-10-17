@@ -169,7 +169,7 @@ const Form = () => {
                         />
                     </div>
                     <div className="col-sm-6 col-12 mt-3">
-                        <label htmlFor="manager_name" className="row"><strong>Manager's Name</strong></label>
+                        <label htmlFor="manager_name" className="row"><strong>Department Leader/Manager [Fullname]</strong></label>
                         <input
                             type="text"
                             name="manager_name"
@@ -183,7 +183,7 @@ const Form = () => {
                 </div>
                 <div className="row">
                     <div className="col-sm-6 col-12 mt-3">
-                        <label htmlFor="requestor_name" className="row"><strong>Completed By</strong></label>
+                        <label htmlFor="requestor_name" className="row"><strong>Completed By [Fullname]</strong></label>
                         <input
                             type="text"
                             name="requestor_name"
