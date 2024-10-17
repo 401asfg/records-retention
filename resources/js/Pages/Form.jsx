@@ -218,7 +218,7 @@ const Form = () => {
                             <div style={{ position: "-webkit-sticky", position: "sticky", top: "20px" }}>
                                 <div className="row justify-content-center">
                                     <div className="d-lg-block d-none">
-                                        <div className="border bg-light p-2">
+                                        <div className="border bg-light p-2 mb-3">
                                             <Info />
                                         </div>
                                     </div>
