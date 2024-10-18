@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-import Box from "../Components/Box";
 import SearchableDropdown from "../Components/SearchableDropdown";
 import Modal from "../Components/Modal";
 import logo from "../../../public/logo.png";
+import BoxList from "../Components/BoxList";
 
 // TODO: test
 // TODO: test cookie system (make sure query is only used if there is a valid dept id and vice versa)
@@ -17,6 +17,7 @@ const Form = () => {
     const INIT_BOX_ID = 1;
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const COOKIE_OPTIONS = { maxAge: 60 * 60 * 24 * 14 };
+    const MAIL_FAILURE_RESPONSE_STATUS = 207;
 
     const [cookies, setCookie] = useCookies();
 
@@ -27,12 +28,11 @@ const Form = () => {
 
     const [isInfoOpen, setInfoOpen] = useState(false);
     const [isConfirmationOpen, setConfirmationOpen] = useState(false);
+
     const [isSubmissionSuccessfulOpen, setSubmissionSuccessfulOpen] = useState(false);
-
     const [isSubmissionFailedOpen, setSubmissionFailedOpen] = useState(false);
-    const submissionFailedError = useRef("");
+    const submissionError = useRef(null);
 
-    const nextBoxId = useRef(INIT_BOX_ID + 1);
     const [boxes, setBoxes] = useState([{
         id: INIT_BOX_ID,
         description: "",
@@ -43,49 +43,6 @@ const Form = () => {
     useEffect(() => {
         document.title = "Records Retention Form"
     }, []);
-
-    const addBox = () => {
-        setBoxes([...boxes, {
-            id: nextBoxId.current,
-            description: "",
-            // FIXME: should this use null instead?
-            destroyDate: ""
-        }]);
-
-        nextBoxId.current++;
-    }
-
-    const removeBox = (index) => {
-        setBoxes([...boxes.slice(0, index), ...boxes.slice(index + 1)]);
-    }
-
-    const setBox = (index, box) => {
-        const newBox = {
-            id: boxes[index].id,
-            description: box.description,
-            destroyDate: box.destroyDate
-        };
-
-        setBoxes([...boxes.slice(0, index), newBox, ...boxes.slice(index + 1)]);
-    }
-
-    const setBoxDescription = (index, description) => {
-        const newBox = {
-            description: description,
-            destroyDate: boxes[index].destroyDate
-        };
-
-        setBox(index, newBox);
-    }
-
-    const setBoxDestroyDate = (index, destroyDate) => {
-        const newBox = {
-            description: boxes[index].description,
-            destroyDate: destroyDate
-        };
-
-        setBox(index, newBox);
-    }
 
     const postRetentionRequest = () => {
         const data = {
@@ -102,12 +59,16 @@ const Form = () => {
         }
 
         axios.defaults.headers.common['X-CSRF-TOKEN'] = CSRF_TOKEN;
+        submissionError.current = null;
 
         // TODO: test failure case
         axios.post('api/retention-requests', data)
-            .then(() => { setSubmissionSuccessfulOpen(true) })
+            .then((res) => {
+                if (res.status === MAIL_FAILURE_RESPONSE_STATUS) submissionError.current = res.data;
+                setSubmissionSuccessfulOpen(true);
+            })
             .catch((error) => {
-                submissionFailedError.current = error.response.data;
+                submissionError.current = error.response.data;
                 setSubmissionFailedOpen(true);
             });
     }
@@ -232,25 +193,7 @@ const Form = () => {
                             </div>
                         </div>
                         <div className="col-lg-6 col-8">
-                            {boxes.map((box, i) =>
-                                // FIXME: refactor box/boxes into class?
-                                <Box
-                                    key={box.id}
-                                    box={box}
-                                    setDescription={(value) => setBoxDescription(i, value)}
-                                    setDestroyDate={(value) => setBoxDestroyDate(i, value)}
-                                    remove={i === 0 ? null : () => removeBox(i)}
-                                />
-                            )}
-                            <div className="row justify-content-center">
-                                <button
-                                    onClick={addBox}
-                                    type="button"
-                                    id="add-box"
-                                    className="rounded-circle"
-                                    style={{width: "40px", height: "40px"}}
-                                >+</button>
-                            </div>
+                            <BoxList initNextBoxId={INIT_BOX_ID + 1} boxes={boxes} setBoxes={setBoxes} />
                             <div className="row justify-content-center mt-5 mb-5">
                                 <input
                                     type="submit"
@@ -278,6 +221,13 @@ const Form = () => {
             {/* TODO: have the page refresh on close? */}
             <Modal isOpen={isSubmissionSuccessfulOpen} onClose={() => setSubmissionSuccessfulOpen(false)}>
                 <div className="row justify-content-center text-center">Your retention request was successfully submitted for approval!</div>
+                {submissionError.current && (
+                    <div>
+                        <div className="row justify-content-center text-center"><br />Unfortunately, the approvers could not be emailed due to the following error:</div>
+                        <div className="row justify-content-center text-center">{submissionError.current}</div>
+                        <div className="row justify-content-center text-center"><br />However, the approvers will still be able to approve your request.</div>
+                    </div>
+                )}
                 <div className="row justify-content-center mt-3">
                     <button type="button" onClick={() => setSubmissionSuccessfulOpen(false)} style={{width: "100px"}}>Okay</button>
                 </div>
@@ -285,7 +235,9 @@ const Form = () => {
 
             <Modal isOpen={isSubmissionFailedOpen} onClose={() => setSubmissionFailedOpen(false)}>
                 <div className="row justify-content-center text-center">The following error prevented your retention request from being submitted:</div>
-                <div className="row justify-content-center text-center">{submissionFailedError.current}</div>
+                {submissionError.current && (
+                    <div className="row justify-content-center text-center">{submissionError.current}</div>
+                )}
                 <div className="row justify-content-center mt-3">
                     <button type="button" onClick={() => setSubmissionFailedOpen(false)} style={{width: "100px"}}>Okay</button>
                 </div>

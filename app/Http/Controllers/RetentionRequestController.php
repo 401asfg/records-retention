@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\PendingRecordRetentionRequest;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\RetentionRequestSuccessfullySubmitted;
 use App\Models\Box;
@@ -10,6 +11,7 @@ use App\Models\RetentionRequest;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Symfony\Component\Mailer\Exception\TransportException;
 
 class RetentionRequestController extends Controller
 {
@@ -28,44 +30,43 @@ class RetentionRequestController extends Controller
             'boxes.*.destroy_date' => 'nullable|date'
         ]);
 
+        // TODO: test all exception types
         try {
             DB::beginTransaction();
 
             $retentionRequest = RetentionRequest::create($request->input('retention_request'));
-
-            // FIXME: should the exceptions be more specific subtypes?
-            if (!$retentionRequest)
-                throw new \Exception('Failed to save a Retention Request');
 
             $retentionRequestId = $retentionRequest['id'];
             $boxesData = $request->input('boxes');
 
             foreach ($boxesData as $boxData) {
                 $boxData['retention_request_id'] = $retentionRequestId;
-                $box = Box::create($boxData);
-
-                // FIXME: should the exceptions be more specific subtypes?
-                if (!$box)
-                    throw new \Exception('Failed to save a Box');
+                Box::create($boxData);
             }
 
             DB::commit();
-        } catch (\Exception $exception) {
+
+            // FIXME: should this be moved inside the transaction so it fails loudly?
+            $this::emailInvolvedParties(
+                [
+                    "name" => $retentionRequest["requestor_name"],
+                    "email" => $retentionRequest["requestor_email"]
+                ],
+                $this::getUserMailingList()
+            );
+        } catch (QueryException $exception) {
+            // FIXME: is this the correct exception type?
+            // FIXME: different exceptions for when retention request fails vs when box fails?
             DB::rollBack();
             return response($exception->getMessage(), 400)->header('Content-Type', 'text/plain');
+        } catch (\LogicException $exception) {
+            return response($exception->getMessage(), 207)->header('Content-Type', 'text/plain');
+        } catch (TransportException $exception) {
+            return response($exception->getMessage(), 207)->header('Content-Type', 'text/plain');
         }
 
-        // FIXME: should this be moved inside the try block so it fails loudly?
-        $this::emailInvolvedParties(
-            [
-                "name" => $retentionRequest["requestor_name"],
-                "email" => $retentionRequest["requestor_email"]
-            ],
-            $this::getUserMailingList()
-        );
-
         // FIXME: create error page
-        return response(['status' => 'success'], 200);
+        return response(['status' => 'success'], 200)->header('Content-Type', 'text/plain');
     }
 
     // FIXME: handle failure case
