@@ -17,42 +17,42 @@ class UserSeeder extends Seeder
 
         User::create([
             "name" => "Viewer Receiving Emails",
-            "email" => "records.retention.form.test.1@gmail.com",
+            "email" => env('USER_EMAIL_VIEWER_RECEIVING_EMAILS'),
             "is_receiving_emails" => true,
             "role_id" => 1
         ]);
 
         User::create([
             "name" => "Viewer Not Receiving Emails",
-            "email" => "records.retention.form.test.2@gmail.com",
+            "email" => env('USER_EMAIL_VIEWER_NOT_RECEIVING_EMAILS'),
             "is_receiving_emails" => false,
             "role_id" => 1
         ]);
 
         User::create([
             "name" => "Authorizer Receiving Emails",
-            "email" => "records.retention.form.test.3@gmail.com",
+            "email" => env('USER_EMAIL_AUTHORIZER_RECEIVING_EMAILS'),
             "is_receiving_emails" => true,
             "role_id" => 2
         ]);
 
         User::create([
             "name" => "Authorizer Not Receiving Emails",
-            "email" => "records.retention.form.test.4@gmail.com",
+            "email" => env('USER_EMAIL_AUTHORIZER_NOT_RECEIVING_EMAILS'),
             "is_receiving_emails" => false,
             "role_id" => 2
         ]);
 
         User::create([
             "name" => "Admin Receiving Emails",
-            "email" => "records.retention.form.test.5@gmail.com",
+            "email" => env('USER_EMAIL_ADMIN_RECEIVING_EMAILS'),
             "is_receiving_emails" => true,
             "role_id" => 3
         ]);
 
         User::create([
             "name" => "Admin Not Receiving Emails",
-            "email" => "records.retention.form.test.6@gmail.com",
+            "email" => env('USER_EMAIL_ADMIN_NOT_RECEIVING_EMAILS'),
             "is_receiving_emails" => false,
             "role_id" => 3
         ]);

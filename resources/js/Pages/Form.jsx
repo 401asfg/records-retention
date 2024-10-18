@@ -16,7 +16,7 @@ import BoxList from "../Components/BoxList";
 const Form = () => {
     const INIT_BOX_ID = 1;
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const COOKIE_OPTIONS = { maxAge: 60 * 60 * 24 * 14 };
+    const COOKIE_OPTIONS = { maxAge: 1209600 }; // two weeks (60 * 60 * 24 * 14)
     const MAIL_FAILURE_RESPONSE_STATUS = 207;
 
     const [cookies, setCookie] = useCookies();
