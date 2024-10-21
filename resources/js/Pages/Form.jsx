@@ -14,25 +14,27 @@ import BoxList from "../Components/BoxList";
 // TODO: use content management system?
 
 const Form = () => {
-    const INIT_BOX_ID = 1;
-    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const COOKIE_OPTIONS = { maxAge: 1209600 }; // two weeks (60 * 60 * 24 * 14)
+    const [cookies, setCookie] = useCookies();
+
+    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const MAIL_FAILURE_RESPONSE_STATUS = 207;
 
-    const [cookies, setCookie] = useCookies();
+    const MODAL_NONE = 0;
+    const MODAL_INFO = 1;
+    const MODAL_CONFIRMATION = 2;
+    const MODAL_SUBMISSION_SUCCESSFUL = 3;
+    const MODAL_SUBMISSION_FAILED = 4;
+
+    const [openModal, setOpenModal] = useState(MODAL_NONE);
+    const submissionError = useRef(null);
 
     const [departmentId, setDepartmentId] = useState(cookies.department_id || null);
     const [managerName, setManagerName] = useState(cookies.manager_name || "");
     const [requestorName, setRequestorName] = useState(cookies.requestor_name || "");
     const [requestorEmail, setRequestorEmail] = useState(cookies.requestor_email || "");
 
-    const [isInfoOpen, setInfoOpen] = useState(false);
-    const [isConfirmationOpen, setConfirmationOpen] = useState(false);
-
-    const [isSubmissionSuccessfulOpen, setSubmissionSuccessfulOpen] = useState(false);
-    const [isSubmissionFailedOpen, setSubmissionFailedOpen] = useState(false);
-    const submissionError = useRef(null);
-
+    const INIT_BOX_ID = 1;
     const [boxes, setBoxes] = useState([{
         id: INIT_BOX_ID,
         description: "",
@@ -65,16 +67,17 @@ const Form = () => {
         axios.post('api/retention-requests', data)
             .then((res) => {
                 if (res.status === MAIL_FAILURE_RESPONSE_STATUS) submissionError.current = res.data;
-                setSubmissionSuccessfulOpen(true);
+                setOpenModal(MODAL_SUBMISSION_SUCCESSFUL);
             })
             .catch((error) => {
+                console.log(error);
                 submissionError.current = error.response.data;
-                setSubmissionFailedOpen(true);
+                setOpenModal(MODAL_SUBMISSION_FAILED);
             });
     }
 
     const confirm = () => {
-        setConfirmationOpen(false);
+        setOpenModal(MODAL_NONE);
 
         setCookie("manager_name", managerName, COOKIE_OPTIONS);
         setCookie("requestor_name", requestorName, COOKIE_OPTIONS);
@@ -86,7 +89,7 @@ const Form = () => {
 
     const submit = async (event) => {
         event.preventDefault();
-        setConfirmationOpen(true);
+        setOpenModal(MODAL_CONFIRMATION);
     };
 
     const Info = () => {
@@ -185,7 +188,7 @@ const Form = () => {
                                     </div>
                                     <button
                                         className="d-lg-none d-block"
-                                        onClick={() => setInfoOpen(true)}
+                                        onClick={() => setOpenModal(MODAL_INFO)}
                                         type="button"
                                         style={{width: "40px", height: "40px"}}
                                     >!</button>
@@ -205,11 +208,11 @@ const Form = () => {
                 </div>
             </form>
 
-            <Modal isOpen={isInfoOpen} onClose={() => setInfoOpen(false)}>
+            <Modal isOpen={openModal == MODAL_INFO} onClose={() => setOpenModal(MODAL_NONE)}>
                 <Info />
             </Modal>
 
-            <Modal isOpen={isConfirmationOpen} onClose={() => setConfirmationOpen(false)}>
+            <Modal isOpen={openModal == MODAL_CONFIRMATION} onClose={() => setOpenModal(MODAL_NONE)}>
                 <div className="container-fluid text-center">
                     <div className="row justify-content-center">Are you sure you're ready to submit this retention request?</div>
                     <div className="row justify-content-center mt-3">
@@ -219,7 +222,7 @@ const Form = () => {
             </Modal>
 
             {/* TODO: have the page refresh on close? */}
-            <Modal isOpen={isSubmissionSuccessfulOpen} onClose={() => setSubmissionSuccessfulOpen(false)}>
+            <Modal isOpen={openModal == MODAL_SUBMISSION_SUCCESSFUL} onClose={() => setOpenModal(MODAL_NONE)}>
                 <div className="row justify-content-center text-center">Your retention request was successfully submitted for approval!</div>
                 {submissionError.current && (
                     <div>
@@ -229,17 +232,17 @@ const Form = () => {
                     </div>
                 )}
                 <div className="row justify-content-center mt-3">
-                    <button type="button" onClick={() => setSubmissionSuccessfulOpen(false)} style={{width: "100px"}}>Okay</button>
+                    <button type="button" onClick={() => setOpenModal(MODAL_NONE)} style={{width: "100px"}}>Okay</button>
                 </div>
             </Modal>
 
-            <Modal isOpen={isSubmissionFailedOpen} onClose={() => setSubmissionFailedOpen(false)}>
+            <Modal isOpen={openModal == MODAL_SUBMISSION_FAILED} onClose={() => setOpenModal(MODAL_NONE)}>
                 <div className="row justify-content-center text-center">The following error prevented your retention request from being submitted:</div>
                 {submissionError.current && (
                     <div className="row justify-content-center text-center">{submissionError.current}</div>
                 )}
                 <div className="row justify-content-center mt-3">
-                    <button type="button" onClick={() => setSubmissionFailedOpen(false)} style={{width: "100px"}}>Okay</button>
+                    <button type="button" onClick={() => setOpenModal(MODAL_NONE)} style={{width: "100px"}}>Okay</button>
                 </div>
             </Modal>
         </div>
