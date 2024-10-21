@@ -46,6 +46,10 @@ const Form = () => {
         document.title = "Records Retention Form"
     }, []);
 
+    const closeModal = () => {
+        setOpenModal(MODAL_NONE);
+    }
+
     const postRetentionRequest = () => {
         const data = {
             "retention_request": {
@@ -77,7 +81,7 @@ const Form = () => {
     }
 
     const confirm = () => {
-        setOpenModal(MODAL_NONE);
+        closeModal();
 
         setCookie("manager_name", managerName, COOKIE_OPTIONS);
         setCookie("requestor_name", requestorName, COOKIE_OPTIONS);
@@ -208,11 +212,11 @@ const Form = () => {
                 </div>
             </form>
 
-            <Modal isOpen={openModal == MODAL_INFO} onClose={() => setOpenModal(MODAL_NONE)}>
+            <Modal isOpen={openModal == MODAL_INFO} onClose={closeModal}>
                 <Info />
             </Modal>
 
-            <Modal isOpen={openModal == MODAL_CONFIRMATION} onClose={() => setOpenModal(MODAL_NONE)}>
+            <Modal isOpen={openModal == MODAL_CONFIRMATION} onClose={closeModal}>
                 <div className="container-fluid text-center">
                     <div className="row justify-content-center">Are you sure you're ready to submit this retention request?</div>
                     <div className="row justify-content-center mt-3">
@@ -222,7 +226,7 @@ const Form = () => {
             </Modal>
 
             {/* TODO: have the page refresh on close? */}
-            <Modal isOpen={openModal == MODAL_SUBMISSION_SUCCESSFUL} onClose={() => setOpenModal(MODAL_NONE)}>
+            <Modal isOpen={openModal == MODAL_SUBMISSION_SUCCESSFUL} onClose={closeModal}>
                 <div className="row justify-content-center text-center">Your retention request was successfully submitted for approval!</div>
                 {submissionError.current && (
                     <div>
@@ -232,17 +236,17 @@ const Form = () => {
                     </div>
                 )}
                 <div className="row justify-content-center mt-3">
-                    <button type="button" onClick={() => setOpenModal(MODAL_NONE)} style={{width: "100px"}}>Okay</button>
+                    <button type="button" onClick={closeModal} style={{width: "100px"}}>Okay</button>
                 </div>
             </Modal>
 
-            <Modal isOpen={openModal == MODAL_SUBMISSION_FAILED} onClose={() => setOpenModal(MODAL_NONE)}>
+            <Modal isOpen={openModal == MODAL_SUBMISSION_FAILED} onClose={closeModal}>
                 <div className="row justify-content-center text-center">The following error prevented your retention request from being submitted:</div>
                 {submissionError.current && (
                     <div className="row justify-content-center text-center">{submissionError.current}</div>
                 )}
                 <div className="row justify-content-center mt-3">
-                    <button type="button" onClick={() => setOpenModal(MODAL_NONE)} style={{width: "100px"}}>Okay</button>
+                    <button type="button" onClick={closeModal} style={{width: "100px"}}>Okay</button>
                 </div>
             </Modal>
         </div>
