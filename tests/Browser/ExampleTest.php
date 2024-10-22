@@ -6,12 +6,12 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
-class BoxTest extends DuskTestCase
+class ExampleTest extends DuskTestCase
 {
     /**
-     * A Dusk test example.
+     * A basic browser test example.
      */
-    public function testExample(): void
+    public function testBasicExample(): void
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
