@@ -25,6 +25,7 @@ const Box = (props) => {
                             style={{height: "100px"}}
                             value={props.box.description}
                             onChange={(event) => props.setDescription(event.target.value)}
+                            dusk={"box-" + props.box.id + "-description"}
                             required
                         />
                     </div>
@@ -39,6 +40,7 @@ const Box = (props) => {
                                 value={FINAL_DISPOSITION_SHRED}
                                 checked={finalDisposition === FINAL_DISPOSITION_SHRED}
                                 onChange={onFinalDispositionChange}
+                                dusk={"box-" + props.box.id + "-final-disposition-shred"}
                                 required
                             /> Shred
                         </label>
@@ -51,6 +53,7 @@ const Box = (props) => {
                                 value={FINAL_DISPOSITION_PERMANENT_STORAGE}
                                 checked={finalDisposition === FINAL_DISPOSITION_PERMANENT_STORAGE}
                                 onChange={onFinalDispositionChange}
+                                dusk={"box-" + props.box.id + "-final-disposition-permanent-storage"}
                                 required
                             /> Permanent Storage
                         </label>
@@ -66,6 +69,7 @@ const Box = (props) => {
                                 id={"destroy_date_" + props.box.id}
                                 value={props.box.destroyDate}
                                 onChange={(event) => props.setDestroyDate(event.target.value)}
+                                dusk={"box-" + props.box.id + "-destroy-date"}
                                 required
                             />
                         </div>
@@ -78,6 +82,7 @@ const Box = (props) => {
                             type="button"
                             id="remove-box"
                             className="rounded-circle"
+                            dusk={"box-" + props.box.id + "-remove-button"}
                             style={{width: "40px", height: "40px"}}
                         >-</button>
                     </div>

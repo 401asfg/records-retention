@@ -1,0 +1,1 @@
+{"version":1,"defects":{"Tests\\Browser\\BoxTest::testAllFieldsInitiallyEmpty":8,"Tests\\Browser\\BoxTest::testNoRemoveButtonOnNullRemoveBox":8,"Tests\\Browser\\BoxTest::testRemoveButtonVisibleOnNonNullRemoveBox":8,"Tests\\Browser\\ExampleTest::testBasicExample":8},"times":{"Tests\\Browser\\ExampleTest::testBasicExample":0.206}}

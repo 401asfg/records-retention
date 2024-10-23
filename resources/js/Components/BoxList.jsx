@@ -66,6 +66,7 @@ const BoxList = (props) => {
                     id="add-box"
                     className="rounded-circle"
                     style={{width: "40px", height: "40px"}}
+                    dusk="add-box"
                 >+</button>
             </div>
         </div>
