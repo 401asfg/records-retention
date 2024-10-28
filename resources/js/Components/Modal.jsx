@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 
 // TODO: test
+// TODO: add appear and disappear animations?
 
 const Modal = (props) => {
     if (!props.isOpen) return null;

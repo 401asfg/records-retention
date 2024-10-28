@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 // TODO: test
+// TODO: add fade in and fade out when box is added and removed respectively
 
 const Box = (props) => {
     const FINAL_DISPOSITION_SHRED = "shred";
