@@ -2,7 +2,7 @@ import "./bootstrap";
 import "../css/app.css";
 
 import ReactDOM from "react-dom/client";
-import Form from "./Pages/Form";
+import RequestForm from "./Pages/RequestForm";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // TODO: test router
@@ -11,7 +11,7 @@ const App = () => {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Form />} />
+                <Route path="/" element={<RequestForm />} />
             </Routes>
         </BrowserRouter>
     );

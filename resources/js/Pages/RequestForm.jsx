@@ -13,7 +13,7 @@ import BoxList from "../Components/BoxList";
 // FIXME: refactor styling?
 // TODO: use content management system?
 
-const Form = () => {
+const RequestForm = () => {
     const COOKIE_OPTIONS = { maxAge: 1209600 }; // two weeks (60 * 60 * 24 * 14)
     const [cookies, setCookie] = useCookies();
 
@@ -253,4 +253,4 @@ const Form = () => {
     );
 }
 
-export default Form;
+export default RequestForm;
