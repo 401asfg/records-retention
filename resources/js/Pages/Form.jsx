@@ -43,7 +43,7 @@ const Form = () => {
     }]);
 
     useEffect(() => {
-        document.title = "Records Retention Form"
+        document.title = "Records Retention Request Form"
     }, []);
 
     const closeModal = () => {
@@ -121,7 +121,7 @@ const Form = () => {
             <a href="https://library.vcc.ca/" className="row justify-content-center pt-2">
                 <img src={logo} alt="Logo" style={{width: "200px", height: "auto"}}></img>
             </a>
-            <h1 className="text-center mt-3 mb-5">Records Retention Form</h1>
+            <h1 className="text-center mt-3 mb-5">Records Retention Request Form</h1>
             <div className="border border-dark p-2 mb-5">
                 <p>Submit this form to authorize and send boxes of physical records to store at VCC's Downtown campus. Boxes will be held until the end of their retention period and then destroyed. Records should only be sent if they are no longer regularly consulted in office; boxes can be retrieved (up until destruction) with a few days notice.</p>
                 <p>Consult the <a href="https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Femployee.vcc.ca%2Fdepartments%2Foperational%2Frecords-management%2Frecords-retention-schedule%2Frecords-retention-schedule-rrs%2F&data=05%7C02%7Cmallan%40vcc.ca%7Cff4d15c23e4b488202e308dced51a45a%7C9d83cfc7633047d5b18d45bafe3b1d87%7C0%7C0%7C638646182108195445%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=hVknz8R1Ol8kOR51MKdV4mITkfe6voY1ehnHEG%2Fb4uE%3D&reserved=0">Records Retention Schedule</a> to see when records may be destroyed. Please contact the <a href="https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Femployee.vcc.ca%2Fdepartments%2Foperational%2Frecords-management%2Fcontact-records-management%2F&data=05%7C02%7Cmallan%40vcc.ca%7Cff4d15c23e4b488202e308dced51a45a%7C9d83cfc7633047d5b18d45bafe3b1d87%7C0%7C0%7C638646182108241374%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=FTTGPn04zmxXnUD1rsNKdxJO5d3jexpr0QP8EBfzjnU%3D&reserved=0">Records Coordinator</a> if you have any questions.</p>
