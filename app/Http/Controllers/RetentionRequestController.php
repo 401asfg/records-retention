@@ -8,10 +8,37 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\RetentionRequestSuccessfullySubmitted;
 use App\Models\Box;
 use App\Models\RetentionRequest;
+use App\Models\Role;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Symfony\Component\Mailer\Exception\TransportException;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Closure;
+
+// TODO: test
+class UserCanAuthorizeRequests implements ValidationRule
+{
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        $authorizingUserRoleIds = User::where('id', '=', $value)->get('users.role_id');
+        $authorizingUsersCount = $authorizingUserRoleIds->count();
+
+        if ($authorizingUsersCount != 1)
+            $fail("The " . $attribute . " field identifies " . $authorizingUsersCount . " users instead of one user.");
+
+        $authorizingUserRole = Role::findOrFail($authorizingUserRoleIds[0]);
+
+        if ($this::canAuthorizeRequests($authorizingUserRole['permissions_code']))
+            $fail("The " . $attribute . "field is not a user that can authorize requests.");
+    }
+
+    private static function canAuthorizeRequests($permissionsCode): bool
+    {
+        return ($permissionsCode >> Role::CAN_AUTHORIZE_REQUESTS_OFFSET) & Role::PERMISSION_MASK;
+    }
+}
 
 class RetentionRequestController extends Controller
 {
@@ -69,6 +96,32 @@ class RetentionRequestController extends Controller
         return response(['status' => 'success'], 200)->header('Content-Type', 'text/plain');
     }
 
+    // TODO: test
+    public function update(string $id, Request $request)
+    {
+        // FIXME: use verification token for user instead of id
+
+        $idValidator = Validator::make(['id' => $id], [
+            'id' => 'required|numeric|exists:retention_requests,id'
+        ]);
+
+        // FIXME: does this trigger correctly?
+        // FIXME: is this the correct status?
+        if ($idValidator->fails())
+            return response($idValidator->errors(), 422)->header('Content-Type', 'text/plain');
+
+        $request->validate([
+            'authorizing_user_id' => ['required', 'numeric', 'exists:users,id', new UserCanAuthorizeRequests],
+            'boxes' => 'required|array|min:1',
+            'boxes.*.id' => 'required|numeric|exists:boxes,id,retention_request_id,' . $id, // FIXME: does checking the rr id this way work?
+            'boxes.*.description' => 'required|string',
+            'boxes.*.destroy_date' => 'nullable|date'
+        ]);
+
+        // TODO: updates boxes, gives them each unique tracking numbers gives the retention request the authorizing user id
+        // TODO: must give all boxes belonging to retention request unique tracking numbers, even if they aren't present in the request
+    }
+
     // FIXME: handle failure case
     private static function emailInvolvedParties($requestor, $authorizers)
     {
@@ -88,7 +141,6 @@ class RetentionRequestController extends Controller
         }
     }
 
-    // FIXME: refactor to get email from external database?
     // FIXME: handle failure case
     private static function getUserMailingList()
     {
@@ -96,8 +148,10 @@ class RetentionRequestController extends Controller
         $users = DB::table('users')
             ->select(['users.name AS name', 'users.email AS email'])
             ->join('roles', 'users.role_id', '=', 'roles.id')
-            ->where("users.is_receiving_emails", "=", 1)
-            ->whereIn("roles.name", ["Admin", "Authorizer"])
+            ->whereRaw(
+                "users.is_receiving_emails = 1 AND (roles.permissions_code >> ?) & ? = 1",
+                [Role::CAN_RECIEVE_EMAILS_OFFSET, Role::PERMISSION_MASK]
+            )
             ->get();
 
         return $users->map(function ($user) {
