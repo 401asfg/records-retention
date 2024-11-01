@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Spatie\Valuestore\Valuestore;
 use Closure;
 
 // TODO: test
@@ -73,7 +74,7 @@ class RetentionRequestController extends Controller
 
             DB::commit();
 
-            // FIXME: should this be moved inside the transaction so it fails loudly?
+            // FIXME: should this cause a rollback on failure?
             $this::emailInvolvedParties(
                 [
                     "name" => $retentionRequest["requestor_name"],
@@ -118,8 +119,55 @@ class RetentionRequestController extends Controller
             'boxes.*.destroy_date' => 'nullable|date'
         ]);
 
-        // TODO: updates boxes, gives them each unique tracking numbers gives the retention request the authorizing user id
-        // TODO: must give all boxes belonging to retention request unique tracking numbers, even if they aren't present in the request
+        // FIXME: do the exceptions created by this need to be handled?
+        $settings = Valuestore::make(config_path('settings.json'));
+
+        if (!$settings->has('next_tracking_number'))
+            return response("settings.json doesn't contain the next_tracking_number field.", 400)->header('Content-Type', 'text/plain');
+
+        $requestBoxes = $request->input('boxes');
+        usort($requestBoxes, function ($a, $b) {
+            return $a['id'] <=> $b['id'];   // FIXME: is the right order in which to sort? (asc?)
+        });
+
+        $dbBoxes = Box::where("retention_request_id", "=", $id)->orderBy('id')->get('id');
+        // FIXME: do the exceptions created by this need to be handled?
+        $nextTrackingNumber = $settings->get('next_tracking_number');   // FIXME: is this going to be returned as an int?
+        $requestBoxCount = count($requestBoxes);
+        $requestBoxIndex = 0;
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($dbBoxes as $dbBox) {
+                $box['tracking_number'] = $nextTrackingNumber;
+                $nextTrackingNumber++;
+
+                if ($requestBoxIndex < $requestBoxCount && $dbBox['id'] == $requestBoxes[$requestBoxIndex]['id']) {
+                    $requestBox = $requestBoxes[$requestBoxIndex];
+
+                    $box['description'] = $requestBox['description'];
+                    $box['destory_date'] = $requestBox['destory_date'];
+
+                    $requestBoxIndex++;
+                }
+
+                Box::findOrFail($dbBox['id'])->update($box);
+            }
+
+            RetentionRequest::findOrFail($id)->update(['authorizing_user_id' => $request->input('authorizing_user_id')]);
+            // FIXME: handle put exceptions
+            $settings->put('next_tracking_number', $nextTrackingNumber);
+
+            DB::commit();
+        } catch (QueryException $exception) {
+            // FIXME: is this the correct exception type?
+            // FIXME: different exceptions for when retention request fails vs when box fails?
+            DB::rollBack();
+            return response($exception->getMessage(), 400)->header('Content-Type', 'text/plain');
+        }
+
+        return response(['status' => 'success'], 200)->header('Content-Type', 'text/plain');
     }
 
     // FIXME: handle failure case
