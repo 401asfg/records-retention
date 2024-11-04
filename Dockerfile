@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     git \
+    curl \
     zlib1g-dev \
     libcurl4-openssl-dev \
     libicu-dev \
@@ -25,6 +26,9 @@ RUN docker-php-ext-install gd
 RUN docker-php-ext-install zip
 RUN docker-php-ext-install pdo pdo_mysql
 RUN docker-php-ext-install intl
+
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
 
 # Set the working directory
 WORKDIR /var/www/html
@@ -40,6 +44,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install dependencies
 RUN composer install
+RUN npm install
+RUN npm install @testing-library/react @testing-library/jest-dom jest --save-dev
 
 # Expose port 9000 and start PHP-FPM server
 EXPOSE 9000

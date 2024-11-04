@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 // TODO: test
 // TODO: add fade in and fade out when box is added and removed respectively
@@ -26,7 +26,7 @@ const Box = (props) => {
                             style={{height: "100px"}}
                             value={props.box.description}
                             onChange={(event) => props.setDescription(event.target.value)}
-                            dusk={"box-" + props.box.id + "-description"}
+                            data-testid={"description_" + props.box.id}
                             required
                         />
                     </div>
@@ -41,7 +41,7 @@ const Box = (props) => {
                                 value={FINAL_DISPOSITION_SHRED}
                                 checked={finalDisposition === FINAL_DISPOSITION_SHRED}
                                 onChange={onFinalDispositionChange}
-                                dusk={"box-" + props.box.id + "-final-disposition-shred"}
+                                data-testid={"shred_" + props.box.id}
                                 required
                             /> Shred
                         </label>
@@ -54,7 +54,7 @@ const Box = (props) => {
                                 value={FINAL_DISPOSITION_PERMANENT_STORAGE}
                                 checked={finalDisposition === FINAL_DISPOSITION_PERMANENT_STORAGE}
                                 onChange={onFinalDispositionChange}
-                                dusk={"box-" + props.box.id + "-final-disposition-permanent-storage"}
+                                data-testid={"permanent_storage_" + props.box.id}
                                 required
                             /> Permanent Storage
                         </label>
@@ -70,7 +70,7 @@ const Box = (props) => {
                                 id={"destroy_date_" + props.box.id}
                                 value={props.box.destroyDate}
                                 onChange={(event) => props.setDestroyDate(event.target.value)}
-                                dusk={"box-" + props.box.id + "-destroy-date"}
+                                data-testid={"destroy_date_" + props.box.id}
                                 required
                             />
                         </div>
@@ -83,8 +83,8 @@ const Box = (props) => {
                             type="button"
                             id="remove-box"
                             className="rounded-circle"
-                            dusk={"box-" + props.box.id + "-remove-button"}
                             style={{width: "40px", height: "40px"}}
+                            data-testid={"remove_" + props.box.id}
                         >-</button>
                     </div>
                 )}

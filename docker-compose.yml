@@ -10,6 +10,7 @@ services:
       - ./.env:/var/www/html/.env
     environment:
       - APP_ENV=local
+      - NODE_ENV=development
     networks:
       - laravel
     ports:

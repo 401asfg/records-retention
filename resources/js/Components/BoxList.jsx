@@ -8,7 +8,6 @@ const BoxList = (props) => {
         props.setBoxes([...props.boxes, {
             id: nextBoxId.current,
             description: "",
-            // FIXME: should this use null instead?
             destroyDate: ""
         }]);
 
@@ -66,7 +65,6 @@ const BoxList = (props) => {
                     id="add-box"
                     className="rounded-circle"
                     style={{width: "40px", height: "40px"}}
-                    dusk="add-box"
                 >+</button>
             </div>
         </div>
