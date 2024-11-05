@@ -6,6 +6,7 @@ WORKDIR /var/www/html
 COPY package*.json ./
 
 RUN npm install
+RUN npm install -g jest && npm install jest-environment-jsdom
 
 COPY . .
 
