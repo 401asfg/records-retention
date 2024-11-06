@@ -11,7 +11,7 @@ const Box = (props) => {
 
     const onFinalDispositionChange = (event) => {
         setFinalDisposition(event.target.value);
-        if (finalDisposition !== FINAL_DISPOSITION_SHRED) props.setDestroyDate("");
+        if (event.target.value !== FINAL_DISPOSITION_SHRED) props.setDestroyDate("");
     }
 
     return (

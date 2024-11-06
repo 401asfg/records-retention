@@ -1,7 +1,7 @@
 import Box from './Box';
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import React, { act } from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import React from 'react';
 
 describe(Box, () => {
     const BOX_ID = 3;
@@ -106,49 +106,48 @@ describe(Box, () => {
 
     describe('Final Disposition States', () => {
         const BOX_DESCRIPTION = "Test Description 2";
-
-        let destroyDate = "";
+        const setDestroyDateMock = jest.fn();
 
         function renderBoxWithDefaults() {
-            destroyDate = ""
-            renderBox(BOX_DESCRIPTION, destroyDate, () => {}, (value) => {destroyDate = value}, () => {});
+            renderBox(BOX_DESCRIPTION, "", () => {}, setDestroyDateMock, () => {});
         }
 
         function expectBoxWithDefaults(expectedDestroyDate, isShred) {
             expectBox(BOX_DESCRIPTION, expectedDestroyDate, isShred, isShred, true);
-            expect(destroyDate).toBe(expectedDestroyDate);
         }
 
-        test('it should allow the user to fill out the destroy date when the final disposition is set to shred', () => {
+        beforeEach(() => {
             renderBoxWithDefaults();
+            setDestroyDateMock.mockClear();
+        })
 
+        test('it should allow the user to fill out the destroy date when the final disposition is set to shred', () => {
             const destroyDate = queryDestroyDate();
             act(() => {
                 fireEvent.change(destroyDate, { target: { value: "2023-12-31" } });
             });
 
             expectBoxWithDefaults("2023-12-31", true);
+            expect(setDestroyDateMock).toHaveBeenCalledWith("2023-12-31");
         })
 
         test('it should remove the destroy date field on changing to permanent storage', () => {
-            renderBoxWithDefaults();
-
             const permanentStorage = getPermanentStorage();
-
             act(() => {
                 permanentStorage.click();
             })
 
             expectBoxWithDefaults("", false);
+            expect(setDestroyDateMock).toHaveBeenCalledWith("");
         })
 
         test('it should bring back an empty destroy date field on changing to back to shred', () => {
-            renderBoxWithDefaults();
-
             const permanentStorage = getPermanentStorage();
             act(() => {
                 permanentStorage.click();
             });
+
+            expect(setDestroyDateMock).toHaveBeenCalledWith("");
 
             const shred = getShred();
             act(() => {
@@ -159,12 +158,12 @@ describe(Box, () => {
         });
 
         test('it should set a filled out destroy date to empty on changing to permanent storage and back to shred', () => {
-            renderBoxWithDefaults();
-
             const destroyDate = queryDestroyDate();
             act(() => {
                 fireEvent.change(destroyDate, { target: { value: "2023-12-31" } });
             });
+
+            expect(setDestroyDateMock).toHaveBeenCalledWith("2023-12-31");
 
             const permanentStorage = getPermanentStorage();
             act(() => {
@@ -182,8 +181,6 @@ describe(Box, () => {
         });
 
         test('it should allow the user to fill out the destroy date again after toggling between permanent storage and shred', () => {
-            renderBoxWithDefaults();
-
             const permanentStorage = getPermanentStorage();
             act(() => {
                 permanentStorage.click();
@@ -199,12 +196,11 @@ describe(Box, () => {
                 fireEvent.change(destroyDate, { target: { value: "2023-12-31" } });
             });
 
-            expectBoxWithDefaults("2023-12-31", true, true);
+            expectBoxWithDefaults("2023-12-31", true);
+            expect(setDestroyDateMock).toHaveBeenCalledWith("2023-12-31");
         });
 
         test('it should set the destroy date to empty again after filling it out for a second time on toggling between permanent storage and shred again', () => {
-            renderBoxWithDefaults();
-
             const permanentStorage = getPermanentStorage();
             act(() => {
                 permanentStorage.click();
@@ -219,6 +215,8 @@ describe(Box, () => {
             act(() => {
                 fireEvent.change(destroyDate, { target: { value: "2023-12-31" } });
             });
+
+            expect(setDestroyDateMock).toHaveBeenCalledWith("2023-12-31");
 
             act(() => {
                 permanentStorage.click();
