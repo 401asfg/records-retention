@@ -231,4 +231,68 @@ describe(Box, () => {
             expectBoxWithDefaults("", true);
         });
     })
+
+    describe('Description States', () => {
+        test('it should allow the user to fill out the description', () => {
+            const setDescriptionMock = jest.fn();
+            renderBox("", "", setDescriptionMock, () => {}, () => {});
+
+            const description = getDescription();
+            act(() => {
+                fireEvent.change(description, { target: { value: "New Description" } });
+            });
+
+            expect(setDescriptionMock).toHaveBeenCalledWith("New Description");
+        })
+
+        test('it should not be changed on switching from shred to permanent storage', () => {
+            const setDescriptionMock = jest.fn();
+            renderBox("Old Description", "", setDescriptionMock, () => {}, () => {});
+
+            const permanentStorage = getPermanentStorage();
+            act(() => {
+                permanentStorage.click();
+            });
+
+            expect(setDescriptionMock).not.toHaveBeenCalled();
+        })
+
+        test('it should not be changed on switching from permanent storage to shred', () => {
+            const setDescriptionMock = jest.fn();
+            renderBox("Old Description", "", setDescriptionMock, () => {}, () => {});
+
+            const shred = getShred();
+            act(() => {
+                shred.click();
+            });
+
+            expect(setDescriptionMock).not.toHaveBeenCalled();
+        })
+
+        test('it should not be changed on setting the destroy date', () => {
+            const setDescriptionMock = jest.fn();
+            renderBox("Old Description", "", setDescriptionMock, () => {}, () => {});
+
+            const destroyDate = queryDestroyDate();
+            act(() => {
+                fireEvent.change(destroyDate, { target: { value: "2023-12-31" } });
+            });
+
+            expect(setDescriptionMock).not.toHaveBeenCalled();
+        })
+    })
+
+    describe('Remove', () => {
+        test('it should call the remove function when the remove button is clicked', () => {
+            const removeMock = jest.fn();
+            renderBox("", "", () => {}, () => {}, removeMock);
+
+            const removeButton = queryRemoveButton();
+            act(() => {
+                removeButton.click();
+            });
+
+            expect(removeMock).toHaveBeenCalled();
+        })
+    })
 });
