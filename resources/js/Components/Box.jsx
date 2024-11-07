@@ -15,7 +15,10 @@ const Box = (props) => {
     }
 
     return (
-        <div className="row d-flex justify-content-center align-items-center">
+        <div
+            className="row d-flex justify-content-center align-items-center"
+            data-testid={"box_" + props.box.id}
+        >
             <div className="position-relative">
                 <div className="row border p-2 mb-5">
                     <div className="col-12">

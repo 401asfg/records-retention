@@ -1,5 +1,5 @@
 import Box from "./Box";
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 
 const BoxList = (props) => {
     const nextBoxId = useRef(props.initNextBoxId);
@@ -65,6 +65,7 @@ const BoxList = (props) => {
                     id="add-box"
                     className="rounded-circle"
                     style={{width: "40px", height: "40px"}}
+                    data-testid="add_box"
                 >+</button>
             </div>
         </div>

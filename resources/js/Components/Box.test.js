@@ -82,23 +82,23 @@ describe(Box, () => {
             expectBox(BOX_DESCRIPTION, expectedDestroyDate, true, true, isRemoveButtonPresent);
         }
 
-        test('it should have the given id, given description, an empty destroy date, a shred final disposition, and no remove button when given an empty destroy date and a null remove function', () => {
+        it('should have the given id, given description, an empty destroy date, a shred final disposition, and no remove button when given an empty destroy date and a null remove function', () => {
             renderBoxWithDefaults("", null);
             expectBoxWithDefaults("", false);
         });
 
-        test('it should still have an empty destroy date when given an invalid destroy date', () => {
+        it('should still have an empty destroy date when given an invalid destroy date', () => {
             renderBoxWithDefaults("invalid-date", null);
             expectBoxWithDefaults("", false);
         });
 
-        test('it should have the given destroy date when given a valid destroy date', () => {
+        it('should have the given destroy date when given a valid destroy date', () => {
             const validDestroyDate = "2023-12-31";
             renderBoxWithDefaults(validDestroyDate, null);
             expectBoxWithDefaults(validDestroyDate, false);
         });
 
-        test('it should have a remove button when given a remove function', () => {
+        it('should have a remove button when given a remove function', () => {
             renderBoxWithDefaults("", () => {});
             expectBoxWithDefaults("", true);
         });
@@ -121,7 +121,7 @@ describe(Box, () => {
             setDestroyDateMock.mockClear();
         })
 
-        test('it should allow the user to fill out the destroy date when the final disposition is set to shred', () => {
+        it('should allow the user to fill out the destroy date when the final disposition is set to shred', () => {
             const destroyDate = queryDestroyDate();
             act(() => {
                 fireEvent.change(destroyDate, { target: { value: "2023-12-31" } });
@@ -131,7 +131,7 @@ describe(Box, () => {
             expect(setDestroyDateMock).toHaveBeenCalledWith("2023-12-31");
         })
 
-        test('it should remove the destroy date field on changing to permanent storage', () => {
+        it('should remove the destroy date field on changing to permanent storage', () => {
             const permanentStorage = getPermanentStorage();
             act(() => {
                 permanentStorage.click();
@@ -141,7 +141,7 @@ describe(Box, () => {
             expect(setDestroyDateMock).toHaveBeenCalledWith("");
         })
 
-        test('it should bring back an empty destroy date field on changing to back to shred', () => {
+        it('should bring back an empty destroy date field on changing to back to shred', () => {
             const permanentStorage = getPermanentStorage();
             act(() => {
                 permanentStorage.click();
@@ -157,7 +157,7 @@ describe(Box, () => {
             expectBoxWithDefaults("", true);
         });
 
-        test('it should set a filled out destroy date to empty on changing to permanent storage and back to shred', () => {
+        it('should set a filled out destroy date to empty on changing to permanent storage and back to shred', () => {
             const destroyDate = queryDestroyDate();
             act(() => {
                 fireEvent.change(destroyDate, { target: { value: "2023-12-31" } });
@@ -180,7 +180,7 @@ describe(Box, () => {
             expectBoxWithDefaults("", true);
         });
 
-        test('it should allow the user to fill out the destroy date again after toggling between permanent storage and shred', () => {
+        it('should allow the user to fill out the destroy date again after toggling between permanent storage and shred', () => {
             const permanentStorage = getPermanentStorage();
             act(() => {
                 permanentStorage.click();
@@ -200,7 +200,7 @@ describe(Box, () => {
             expect(setDestroyDateMock).toHaveBeenCalledWith("2023-12-31");
         });
 
-        test('it should set the destroy date to empty again after filling it out for a second time on toggling between permanent storage and shred again', () => {
+        it('should set the destroy date to empty again after filling it out for a second time on toggling between permanent storage and shred again', () => {
             const permanentStorage = getPermanentStorage();
             act(() => {
                 permanentStorage.click();
@@ -233,7 +233,7 @@ describe(Box, () => {
     })
 
     describe('Description States', () => {
-        test('it should allow the user to fill out the description', () => {
+        it('should allow the user to fill out the description', () => {
             const setDescriptionMock = jest.fn();
             renderBox("", "", setDescriptionMock, () => {}, () => {});
 
@@ -245,7 +245,7 @@ describe(Box, () => {
             expect(setDescriptionMock).toHaveBeenCalledWith("New Description");
         })
 
-        test('it should not be changed on switching from shred to permanent storage', () => {
+        it('should not be changed on switching from shred to permanent storage', () => {
             const setDescriptionMock = jest.fn();
             renderBox("Old Description", "", setDescriptionMock, () => {}, () => {});
 
@@ -257,7 +257,7 @@ describe(Box, () => {
             expect(setDescriptionMock).not.toHaveBeenCalled();
         })
 
-        test('it should not be changed on switching from permanent storage to shred', () => {
+        it('should not be changed on switching from permanent storage to shred', () => {
             const setDescriptionMock = jest.fn();
             renderBox("Old Description", "", setDescriptionMock, () => {}, () => {});
 
@@ -269,7 +269,7 @@ describe(Box, () => {
             expect(setDescriptionMock).not.toHaveBeenCalled();
         })
 
-        test('it should not be changed on setting the destroy date', () => {
+        it('should not be changed on setting the destroy date', () => {
             const setDescriptionMock = jest.fn();
             renderBox("Old Description", "", setDescriptionMock, () => {}, () => {});
 
@@ -283,7 +283,7 @@ describe(Box, () => {
     })
 
     describe('Remove', () => {
-        test('it should call the remove function when the remove button is clicked', () => {
+        it('should call the remove function when the remove button is clicked', () => {
             const removeMock = jest.fn();
             renderBox("", "", () => {}, () => {}, removeMock);
 
