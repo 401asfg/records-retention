@@ -17,7 +17,7 @@ const Box = (props) => {
     return (
         <div
             className="row d-flex justify-content-center align-items-center"
-            data-testid={"box_" + props.box.id}
+            data-testid={"box-" + props.box.id}
         >
             <div className="position-relative">
                 <div className="row border p-2 mb-5">
@@ -29,7 +29,7 @@ const Box = (props) => {
                             style={{height: "100px"}}
                             value={props.box.description}
                             onChange={(event) => props.setDescription(event.target.value)}
-                            data-testid={"description_" + props.box.id}
+                            data-testid={"description-" + props.box.id}
                             required
                         />
                     </div>
@@ -44,7 +44,7 @@ const Box = (props) => {
                                 value={FINAL_DISPOSITION_SHRED}
                                 checked={finalDisposition === FINAL_DISPOSITION_SHRED}
                                 onChange={onFinalDispositionChange}
-                                data-testid={"shred_" + props.box.id}
+                                data-testid={"shred-" + props.box.id}
                                 required
                             /> Shred
                         </label>
@@ -57,7 +57,7 @@ const Box = (props) => {
                                 value={FINAL_DISPOSITION_PERMANENT_STORAGE}
                                 checked={finalDisposition === FINAL_DISPOSITION_PERMANENT_STORAGE}
                                 onChange={onFinalDispositionChange}
-                                data-testid={"permanent_storage_" + props.box.id}
+                                data-testid={"permanent-storage-" + props.box.id}
                                 required
                             /> Permanent Storage
                         </label>
@@ -73,7 +73,7 @@ const Box = (props) => {
                                 id={"destroy_date_" + props.box.id}
                                 value={props.box.destroyDate}
                                 onChange={(event) => props.setDestroyDate(event.target.value)}
-                                data-testid={"destroy_date_" + props.box.id}
+                                data-testid={"destroy-date-" + props.box.id}
                                 required
                             />
                         </div>
@@ -87,7 +87,7 @@ const Box = (props) => {
                             id="remove-box"
                             className="rounded-circle"
                             style={{width: "40px", height: "40px"}}
-                            data-testid={"remove_" + props.box.id}
+                            data-testid={"remove-" + props.box.id}
                         >-</button>
                     </div>
                 )}

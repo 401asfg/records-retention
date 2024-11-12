@@ -17,23 +17,23 @@ describe(Box, () => {
     }
 
     function getDescription() {
-        return screen.getByTestId('description_' + BOX_ID);
+        return screen.getByTestId('description-' + BOX_ID);
     }
 
     function queryDestroyDate() {
-        return screen.queryByTestId("destroy_date_" + BOX_ID);
+        return screen.queryByTestId("destroy-date-" + BOX_ID);
     }
 
     function getShred() {
-        return screen.getByTestId("shred_" + BOX_ID);
+        return screen.getByTestId("shred-" + BOX_ID);
     }
 
     function getPermanentStorage() {
-        return screen.getByTestId("permanent_storage_" + BOX_ID);
+        return screen.getByTestId("permanent-storage-" + BOX_ID);
     }
 
     function queryRemoveButton() {
-        return screen.queryByTestId("remove_" + BOX_ID);
+        return screen.queryByTestId("remove-" + BOX_ID);
     }
 
     function expectBox(expectedDescription, expectedDestroyDate, isDestroyDatePresent, isShredChecked, isRemoveButtonPresent) {

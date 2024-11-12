@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
@@ -55,11 +55,11 @@ const SearchableDropdown = (props) => {
     }
 
     const LoadingDropdownContent = () => {
-        return <li className="p-2">Loading...</li>
+        return <li className="p-2" data-testid="searchable-dropdown-loading">Loading...</li>
     }
 
     const NoResultsDropdownContent = () => {
-        return <li className="p-2">No results found</li>
+        return <li className="p-2" data-testid="searchable-dropdown-no-results">No results found</li>
     }
 
     const ResultsDropdownContent = () => {
@@ -73,6 +73,7 @@ const SearchableDropdown = (props) => {
                     onMouseDown={() => selectResult(props.index)}
                     className="p-2"
                     style={{backgroundColor: isHovered ? "#00BFFF" : ""}}
+                    data-testid={"searchable-dropdown-result-" + props.index}
                 >{props.result.name}</li>
             );
         }
@@ -98,11 +99,12 @@ const SearchableDropdown = (props) => {
                 onClick={(event) => setDropdownToOpenOnValidQuery(event.target.value)}
                 onBlur={endSearch}
                 onChange={(event) => search(event.target.value)}
+                data-testid="searchable-dropdown-input"
                 required
             />
             {isDropdownOpen && (
                 <div className="w-100 border shadow bg-light position-absolute" style={{maxHeight: "200px", overflowY: "auto", zIndex: "1"}}>
-                    <ul className="list-unstyled mb-0">
+                    <ul className="list-unstyled mb-0" data-testid="searchable-dropdown-list">
                         <DropdownContent />
                     </ul>
                 </div>
