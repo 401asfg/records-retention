@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DepartmentResource;
 use App\Models\Department;
+use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -31,12 +32,12 @@ class DepartmentController extends Controller
         return DepartmentResource::collection($departments);
     }
 
-    // TODO: test
     public function show(int $id)
     {
         try {
             $department = Department::findOrFail($id);
-        } catch (QueryException $exception) {
+        // FIXME: is this the correct exception type?
+        } catch (Exception $exception) {
             return response($exception->getMessage(), 400)->header('Content-Type', 'text/plain');
         }
 
