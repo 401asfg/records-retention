@@ -23,6 +23,8 @@ class RetentionRequestsAPITest extends TestCase
     // TODO: test database failures?
     // TODO: test sql injection attacks?
 
+    // FIXME: stop tests from whipping the database
+
     use RefreshDatabase;
     // FIXME: find a way to pass valid csrf tokens and remove
     use WithoutMiddleware;
