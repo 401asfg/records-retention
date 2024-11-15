@@ -1,23 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
-import { useCookies } from 'react-cookie';
 
 // TODO: test
-// TODO: test cookie system
 // TODO: add clear button?
 // TODO: take burden off server by querying all once on creation, then filtering results on client side for each query?
 
 const SearchableDropdown = (props) => {
-    const COOKIE_NAME = props.name + "_query";
-
-    const [cookies, setCookie] = useCookies();
-
-    const [query, setQuery] = useState(props.selectedOptionId === null ? "" : (cookies[COOKIE_NAME] || ""));
+    const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const [isLoading, setLoading] = useState(false);
 
+    const isInitializing = useRef(true);
+
     useEffect(() => {
+        if (props.selectedOptionId === null) {
+            isInitializing.current = false;
+            return;
+        }
+
+        // FIXME: handle failure case
+        axios.get(props.sourceRoute + "/" + props.selectedOptionId)
+            .then((res) => { setQuery(res.data.data.name); })
+            .finally(() => { isInitializing.current = false; });
+    }, []);
+
+    useEffect(() => {
+        if (isInitializing.current) return;
         if (query.length === 0) return;
         setLoading(true);
 
@@ -36,7 +45,6 @@ const SearchableDropdown = (props) => {
 
         props.setSelectedOptionId(id);
         setQuery(name);
-        setCookie(COOKIE_NAME, name, props.cookieOptions);
     }
 
     const setDropdownToOpenOnValidQuery = (query) => {

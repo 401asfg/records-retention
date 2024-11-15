@@ -133,11 +133,9 @@ const RequestForm = () => {
                     <div className="col-sm-6 col-12 mt-3">
                         <label htmlFor="department" className="row"><strong>Department</strong></label>
                         <SearchableDropdown
-                            name="departments"
                             sourceRoute="api/departments"
                             selectedOptionId={departmentId}
                             setSelectedOptionId={setDepartmentId}
-                            cookieOptions={COOKIE_OPTIONS}
                         />
                     </div>
                     <div className="col-sm-6 col-12 mt-3">

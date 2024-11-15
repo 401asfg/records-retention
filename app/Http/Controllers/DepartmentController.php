@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DepartmentResource;
 use App\Models\Department;
+use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -29,5 +30,19 @@ class DepartmentController extends Controller
         // FIXME: return this in a response
         // FIXME: handle failure cases
         return DepartmentResource::collection($departments);
+    }
+
+    public function show(int $id)
+    {
+        try {
+            $department = Department::findOrFail($id);
+        // FIXME: is this the correct exception type?
+        } catch (Exception $exception) {
+            return response($exception->getMessage(), 400)->header('Content-Type', 'text/plain');
+        }
+
+        // FIXME: return this in a response
+        // FIXME: handle failure cases
+        return new DepartmentResource($department);
     }
 }

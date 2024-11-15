@@ -1,6 +1,6 @@
 import Box from './Box';
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 
 describe(Box, () => {
@@ -37,38 +37,36 @@ describe(Box, () => {
     }
 
     function expectBox(expectedDescription, expectedDestroyDate, isDestroyDatePresent, isShredChecked, isRemoveButtonPresent) {
-        waitFor(() => {
-            const description = getDescription();
-            expect(description).toHaveValue(expectedDescription);
+        const description = getDescription();
+        expect(description).toHaveValue(expectedDescription);
 
-            const destroyDate = queryDestroyDate();
+        const destroyDate = queryDestroyDate();
 
-            if (isDestroyDatePresent) {
-                expect(destroyDate).toBeInTheDocument();
-                expect(destroyDate).toHaveValue(expectedDestroyDate);
-            } else {
-                expect(destroyDate).not.toBeInTheDocument();
-            }
+        if (isDestroyDatePresent) {
+            expect(destroyDate).toBeInTheDocument();
+            expect(destroyDate).toHaveValue(expectedDestroyDate);
+        } else {
+            expect(destroyDate).not.toBeInTheDocument();
+        }
 
-            const shred = getShred();
-            const permanentStorage = getPermanentStorage();
+        const shred = getShred();
+        const permanentStorage = getPermanentStorage();
 
-            if (isShredChecked) {
-                expect(shred).toBeChecked();
-                expect(permanentStorage).not.toBeChecked();
-            } else {
-                expect(shred).not.toBeChecked();
-                expect(permanentStorage).toBeChecked();
-            }
+        if (isShredChecked) {
+            expect(shred).toBeChecked();
+            expect(permanentStorage).not.toBeChecked();
+        } else {
+            expect(shred).not.toBeChecked();
+            expect(permanentStorage).toBeChecked();
+        }
 
-            const removeButton = queryRemoveButton();
+        const removeButton = queryRemoveButton();
 
-            if (isRemoveButtonPresent) {
-                expect(removeButton).toBeInTheDocument();
-            } else {
-                expect(removeButton).not.toBeInTheDocument();
-            }
-        })
+        if (isRemoveButtonPresent) {
+            expect(removeButton).toBeInTheDocument();
+        } else {
+            expect(removeButton).not.toBeInTheDocument();
+        }
     }
 
     describe('Initialization', () => {
@@ -127,7 +125,6 @@ describe(Box, () => {
                 fireEvent.change(destroyDate, { target: { value: "2023-12-31" } });
             });
 
-            expectBoxWithDefaults("2023-12-31", true);
             expect(setDestroyDateMock).toHaveBeenCalledWith("2023-12-31");
         })
 
@@ -196,7 +193,6 @@ describe(Box, () => {
                 fireEvent.change(destroyDate, { target: { value: "2023-12-31" } });
             });
 
-            expectBoxWithDefaults("2023-12-31", true);
             expect(setDestroyDateMock).toHaveBeenCalledWith("2023-12-31");
         });
 

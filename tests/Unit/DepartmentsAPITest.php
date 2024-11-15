@@ -13,6 +13,7 @@ class DepartmentsAPITest extends TestCase
     // TODO: test network errors?
     // TODO: test database failures?
     // TODO: test sql injection attacks?
+    // TODO: test network errors?
 
     use RefreshDatabase;
 
@@ -131,6 +132,48 @@ class DepartmentsAPITest extends TestCase
     {
         // FIXME: is this correct?
         $this->assertSearchSuccessful("x' or name like '", []);
+    }
+
+    public function testShowValidId()
+    {
+        $this->assertIdSuccessful(102, [
+            'id' => 102,
+            'name' => 'Xylophone Room'
+        ]);
+    }
+
+    public function testShowIdTooLow()
+    {
+        $this->assertIdFailed(30, 'No query results for model [App\Models\Department] 30');
+    }
+
+    public function testShowZeroId()
+    {
+        $this->assertIdFailed(0, 'No query results for model [App\Models\Department] 0');
+    }
+
+    public function testShowNegativeId()
+    {
+        $this->assertIdFailed(-1, 'No query results for model [App\Models\Department] -1');
+    }
+
+    public function testShowTooLargeId()
+    {
+        $this->assertIdFailed(1000000, 'No query results for model [App\Models\Department] 1000000');
+    }
+
+    private function assertIdSuccessful(int $id, array $expectedResult)
+    {
+        $response = $this->get('api/departments/' . $id);
+        $response->assertStatus(200);
+        $response->assertExactJson(['data' => $expectedResult]);
+    }
+
+    private function assertIdFailed(int $id, string $expectedErrors)
+    {
+        $response = $this->get('api/departments/' . $id);
+        $response->assertStatus(400);
+        $response->assertContent($expectedErrors);
     }
 
     private function assertSearchSuccessful(string $query, array $expectedResult)
