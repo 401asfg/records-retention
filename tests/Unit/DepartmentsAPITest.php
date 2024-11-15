@@ -10,6 +10,8 @@ use Database\Seeders\DepartmentSeeder;
 class DepartmentsAPITest extends TestCase
 {
     // TODO: test transactions?
+    // TODO: test network errors?
+    // TODO: test database failures?
     // TODO: test sql injection attacks?
 
     use RefreshDatabase;

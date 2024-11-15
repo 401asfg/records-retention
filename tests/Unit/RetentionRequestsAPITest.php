@@ -2,18 +2,25 @@
 
 namespace Tests\Feature;
 
+use App\Mail\PendingRecordRetentionRequest;
+use App\Mail\RetentionRequestSuccessfullySubmitted;
 use App\Models\Department;
 use App\Models\RetentionRequest;
 use App\Models\Box;
 use Carbon\Carbon;
+use Database\Seeders\RoleSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Database\Seeders\DepartmentSeeder;
+use Illuminate\Support\Facades\Mail;
 
 class RetentionRequestsAPITest extends TestCase
 {
     // TODO: test transactions?
+    // TODO: test network errors?
+    // TODO: test database failures?
     // TODO: test sql injection attacks?
 
     use RefreshDatabase;
@@ -25,9 +32,10 @@ class RetentionRequestsAPITest extends TestCase
         parent::setUp();
         $departmentSeeder = new DepartmentSeeder();
         $departmentSeeder->run();
+        Mail::fake();
     }
 
-    public function testNoData()
+    public function testPostNoData()
     {
         $this->assertPostValidationErrors([], [
             'retention_request.manager_name' => 'The retention request.manager name field is required.',
@@ -411,9 +419,91 @@ class RetentionRequestsAPITest extends TestCase
         ]);
     }
 
+    public function testPostMailSentToRequestorAndValidUsers()
+    {
+        $roleSeeder = new RoleSeeder();
+        $roleSeeder->run();
+
+        $userSeeder = new UserSeeder();
+        $userSeeder->run();
+
+        $data = [
+            'retention_request' => [
+                'manager_name' => 'Dave',
+                'requestor_name' => 'Bob',
+                'requestor_email' => 'bob@gmail.com',
+                'department_id' => Department::max('id')
+            ],
+            'boxes' => [
+                [
+                    'description' => 'Box 1 description',
+                    'destroy_date' => Carbon::today()
+                ],
+                [
+                    'description' => 'Box 2 description',
+                    'destroy_date' => Carbon::yesterday()
+                ],
+                [
+                    'description' => 'Box 3 description',
+                    'destroy_date' => Carbon::tomorrow()
+                ]
+            ]
+        ];
+
+        $this->post('api/retention-requests', $data);
+
+        Mail::assertSent(
+            RetentionRequestSuccessfullySubmitted::class,
+            function ($mail) use ($data) {
+                return $mail->hasTo($data['retention_request']['requestor_email']);
+            }
+        );
+
+        Mail::assertNotSent(
+            PendingRecordRetentionRequest::class,
+            function ($mail) {
+                return $mail->hasTo(env('USER_EMAIL_VIEWER_RECEIVING_EMAILS'));
+            }
+        );
+
+        Mail::assertNotSent(
+            PendingRecordRetentionRequest::class,
+            function ($mail) {
+                return $mail->hasTo(env('USER_EMAIL_VIEWER_NOT_RECEIVING_EMAILS'));
+            }
+        );
+
+        Mail::assertSent(
+            PendingRecordRetentionRequest::class,
+            function ($mail) {
+                return $mail->hasTo(env('USER_EMAIL_AUTHORIZER_RECEIVING_EMAILS'));
+            }
+        );
+
+        Mail::assertNotSent(
+            PendingRecordRetentionRequest::class,
+            function ($mail) {
+                return $mail->hasTo(env('USER_EMAIL_AUTHORIZER_NOT_RECEIVING_EMAILS'));
+            }
+        );
+
+        Mail::assertSent(
+            PendingRecordRetentionRequest::class,
+            function ($mail) {
+                return $mail->hasTo(env('USER_EMAIL_ADMIN_RECEIVING_EMAILS'));
+            }
+        );
+
+        Mail::assertNotSent(
+            PendingRecordRetentionRequest::class,
+            function ($mail) {
+                return $mail->hasTo(env('USER_EMAIL_ADMIN_NOT_RECEIVING_EMAILS'));
+            }
+        );
+    }
+
     private function assertPostValidationErrors(array $data, array $errors)
     {
-
         $response = $this->post('api/retention-requests', $data);
         $response->assertStatus(302);
         $response->assertSessionHasErrors($errors);
