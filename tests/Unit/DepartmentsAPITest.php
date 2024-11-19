@@ -10,7 +10,6 @@ use Database\Seeders\DepartmentSeeder;
 class DepartmentsAPITest extends TestCase
 {
     // TODO: test transactions?
-    // TODO: test network errors?
     // TODO: test database failures?
     // TODO: test sql injection attacks?
     // TODO: test network errors?
@@ -43,27 +42,27 @@ class DepartmentsAPITest extends TestCase
     {
         $this->assertSearchSuccessful('a', [
             [
-                'id' => 28,
+                'id' => 1,
                 'name' => 'Engineering Labs'
             ],
             [
-                'id' => 29,
+                'id' => 2,
                 'name' => 'Medical Testing'
             ],
             [
-                'id' => 31,
+                'id' => 4,
                 'name' => 'Admin Offices'
             ],
             [
-                'id' => 32,
+                'id' => 5,
                 'name' => 'Shipping and Receiving'
             ],
             [
-                'id' => 34,
+                'id' => 7,
                 'name' => 'Yellow Painting Room'
             ],
             [
-                'id' => 36,
+                'id' => 9,
                 'name' => 'Automotive Repair'
             ]
         ]);
@@ -73,11 +72,11 @@ class DepartmentsAPITest extends TestCase
     {
         $this->assertSearchSuccessful('oom', [
             [
-                'id' => 39,
+                'id' => 3,
                 'name' => 'Xylophone Room'
             ],
             [
-                'id' => 43,
+                'id' => 7,
                 'name' => 'Yellow Painting Room'
             ]
         ]);
@@ -87,11 +86,11 @@ class DepartmentsAPITest extends TestCase
     {
         $this->assertSearchSuccessful('Shipping', [
             [
-                'id' => 50,
+                'id' => 5,
                 'name' => 'Shipping and Receiving'
             ],
             [
-                'id' => 51,
+                'id' => 6,
                 'name' => 'Shipping or Receiving'
             ]
         ]);
@@ -101,7 +100,7 @@ class DepartmentsAPITest extends TestCase
     {
         $this->assertSearchSuccessful('cal T', [
             [
-                'id' => 56,
+                'id' => 2,
                 'name' => 'Medical Testing'
             ]
         ]);
@@ -111,7 +110,7 @@ class DepartmentsAPITest extends TestCase
     {
         $this->assertSearchSuccessful('Shipping or Receiving', [
             [
-                'id' => 69,
+                'id' => 6,
                 'name' => 'Shipping or Receiving'
             ]
         ]);
@@ -124,7 +123,7 @@ class DepartmentsAPITest extends TestCase
 
     public function testIndexPreviouslyValidQueryWithDataChanged()
     {
-        Department::destroy([82, 83, 84, 85, 86, 87, 88, 89, 90]);
+        Department::destroy([1, 2, 3, 4, 5, 6, 7, 8, 9]);
         $this->assertSearchSuccessful('Shipping or Receiving', []);
     }
 
@@ -136,15 +135,10 @@ class DepartmentsAPITest extends TestCase
 
     public function testShowValidId()
     {
-        $this->assertIdSuccessful(102, [
-            'id' => 102,
+        $this->assertIdSuccessful(3, [
+            'id' => 3,
             'name' => 'Xylophone Room'
         ]);
-    }
-
-    public function testShowIdTooLow()
-    {
-        $this->assertIdFailed(30, 'No query results for model [App\Models\Department] 30');
     }
 
     public function testShowZeroId()

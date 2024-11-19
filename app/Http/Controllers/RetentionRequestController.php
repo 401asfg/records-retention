@@ -133,30 +133,15 @@ class RetentionRequestController extends Controller
         $dbBoxes = Box::where("retention_request_id", "=", $id)->orderBy('id')->get('id');
         // FIXME: do the exceptions created by this need to be handled?
         $nextTrackingNumber = $settings->get('next_tracking_number');   // FIXME: is this going to be returned as an int?
-        $requestBoxCount = count($requestBoxes);
-        $requestBoxIndex = 0;
 
         try {
             DB::beginTransaction();
 
-            foreach ($dbBoxes as $dbBox) {
-                $box['tracking_number'] = $nextTrackingNumber;
-                $nextTrackingNumber++;
-
-                if ($requestBoxIndex < $requestBoxCount && $dbBox['id'] == $requestBoxes[$requestBoxIndex]['id']) {
-                    $requestBox = $requestBoxes[$requestBoxIndex];
-
-                    $box['description'] = $requestBox['description'];
-                    $box['destory_date'] = $requestBox['destory_date'];
-
-                    $requestBoxIndex++;
-                }
-
-                Box::findOrFail($dbBox['id'])->update($box);
-            }
-
+            $nextTrackingNumber = $this::updateBoxes($dbBoxes, $requestBoxes, $nextTrackingNumber);
             RetentionRequest::findOrFail($id)->update(['authorizing_user_id' => $request->input('authorizing_user_id')]);
+
             // FIXME: handle put exceptions
+            // FIXME: move this into update?
             $settings->put('next_tracking_number', $nextTrackingNumber);
 
             DB::commit();
@@ -168,6 +153,31 @@ class RetentionRequestController extends Controller
         }
 
         return response(['status' => 'success'], 200)->header('Content-Type', 'text/plain');
+    }
+
+    private static function updateBoxes($originalBoxes, $targetBoxes, $initNextTrackingNumber): int
+    {
+        $nextTrackingNumber = $initNextTrackingNumber;
+        $targetBoxIndex = 0;
+        $targetBoxCount = count($targetBoxes);
+
+        foreach ($originalBoxes as $originalBox) {
+            $box['tracking_number'] = $nextTrackingNumber;
+            $nextTrackingNumber++;
+
+            if ($targetBoxIndex < $targetBoxCount && $originalBox['id'] == $targetBoxes[$targetBoxIndex]['id']) {
+                $targetBox = $targetBoxes[$targetBoxIndex];
+
+                $box['description'] = $targetBox['description'];
+                $box['destory_date'] = $targetBox['destory_date'];
+
+                $targetBoxIndex++;
+            }
+
+            Box::findOrFail($originalBox['id'])->update($box);
+        }
+
+        return $nextTrackingNumber;
     }
 
     // FIXME: handle failure case

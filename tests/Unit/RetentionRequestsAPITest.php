@@ -24,7 +24,7 @@ class RetentionRequestsAPITest extends TestCase
     // TODO: test sql injection attacks?
 
     // FIXME: stop tests from whipping the database
-
+    // FIXME: use DatabaseMigrations?
     use RefreshDatabase;
     // FIXME: find a way to pass valid csrf tokens and remove
     use WithoutMiddleware;
@@ -503,6 +503,174 @@ class RetentionRequestsAPITest extends TestCase
             }
         );
     }
+
+    public function testUpdateNoId()
+    {
+
+    }
+
+    public function testUpdateNonNumericId()
+    {
+
+    }
+
+    public function testUpdateNonExistentId()
+    {
+
+    }
+
+    public function testUpdateNoAuthorizingUserId()
+    {
+
+    }
+
+    public function testUpdateNonNumericAuthorizingUserId()
+    {
+
+    }
+
+    public function testUpdateNonExistentAuthorizingUserId()
+    {
+
+    }
+
+    public function testUpdateUserIsViewer()
+    {
+
+    }
+
+    public function testUpdateUserIsAuthorizer()
+    {
+
+    }
+
+    public function testUpdateUserIsAdmin()
+    {
+
+    }
+
+    public function testUpdateNoBoxes()
+    {
+
+    }
+
+    public function testUpdateNoBoxId()
+    {
+
+    }
+
+    public function testUpdateNonNumericBoxId()
+    {
+
+    }
+
+    public function testUpdateNonExistentBoxId()
+    {
+
+    }
+
+    public function testUpdateNoDescription()
+    {
+
+    }
+    public function testUpdateNoDestroyDate()
+    {
+
+    }
+
+    public function testUpdateNullDestroyDate()
+    {
+
+    }
+
+    public function testUpdateNonDateDestroyDate()
+    {
+
+    }
+
+    public function testUpdateIncorrectlyFormattedDestroyDate()
+    {
+
+    }
+
+    public function testUpdateWithOneBox()
+    {
+
+    }
+
+    public function testUpdateWithMultipleBoxes()
+    {
+
+    }
+
+    public function testUpdateNoSettingsFile()
+    {
+
+    }
+
+    public function testUpdateNoNextTrackingNumberInSettingsFile()
+    {
+
+    }
+
+    public function testUpdateOneBoxInDBOneBoxUpdated()
+    {
+
+    }
+
+    public function testUpdateMultipleBoxesInDBOneBoxUpdated()
+    {
+
+    }
+
+    public function testUpdateMultipleBoxesInDBMultipleBoxesUpdated()
+    {
+
+    }
+
+    public function testUpdateMultipleBoxesInDBAllBoxesUpdated()
+    {
+
+    }
+
+    public function testUpdateOneBoxInDBInvalidBoxUpdated()
+    {
+
+    }
+
+    public function testUpdateOneBoxInDBMultipleInvalidBoxesUpdated()
+    {
+
+    }
+
+    public function testUpdateOneBoxInDBSomeInvalidBoxesUpdated()
+    {
+
+    }
+
+    public function testUpdateMultipleBoxesInDBInvalidBoxUpdated()
+    {
+
+    }
+
+    public function testUpdateMultipleBoxesInDBMultipleInvalidBoxesUpdated()
+    {
+
+    }
+
+    public function testUpdateMultipleBoxesInDBSomeInvalidBoxesUpdated()
+    {
+
+    }
+
+    private function assertUpdateSuccessful(string $id, array $data)
+    {
+        $response = $this->put('api/retention-requests/' . $id, $data);
+        $response->assertStatus(200);
+        // TODO: finish (tracking number in settings, all boxes in db updated)
+    }
+
+    // TODO: write fail assertion
 
     private function assertPostValidationErrors(array $data, array $errors)
     {

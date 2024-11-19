@@ -309,7 +309,7 @@ describe(SearchableDropdown, () => {
 
     const indexes = [0, 1, 2, 3, 4, 5];
 
-    function expectDropdownItemHighlighted(index) {
+    function expectOnlyDropdownItemHighlighted(index) {
         // FIXME: decouple this from the page styling
         expect(screen.getByTestId("searchable-dropdown-result-" + index)).toHaveStyle("background-color: #00BFFF");
 
@@ -335,19 +335,19 @@ describe(SearchableDropdown, () => {
             expectNoDropdownItemsHighlighted();
         })
 
-        // it("should highlight the first item in the dropdown when it is hovered over", async () => {
-        //     mockAxiosResponse("o");
-        //     await type("o");
-        //     hoverDropdownItem(0);
-        //     expectDropdownItemHighlighted(0);
-        // })
+        it("should highlight the first item in the dropdown when it is hovered over", async () => {
+            mockAxiosResponse("o");
+            await type("o");
+            hoverDropdownItem(0);
+            expectOnlyDropdownItemHighlighted(0);
+        })
 
         // it("should highlight the next item and unhighlight the first item in the dropdown when the cursor moves to it from the first item", async () => {
         //     mockAxiosResponse("o");
         //     await type("o");
         //     hoverDropdownItem(0);
         //     hoverDropdownItem(1);
-        //     expectDropdownItemHighlighted(1);
+        //     expectOnlyDropdownItemHighlighted(1);
         // })
 
         // it("should unhighlight all items when the cursor moves off the dropdown", () => {
