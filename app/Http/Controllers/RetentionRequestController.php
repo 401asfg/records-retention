@@ -9,37 +9,15 @@ use App\Mail\RetentionRequestSuccessfullySubmitted;
 use App\Models\Box;
 use App\Models\RetentionRequest;
 use App\Models\Role;
-use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\MessageBag;
 use Symfony\Component\Mailer\Exception\TransportException;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Spatie\Valuestore\Valuestore;
-use Closure;
-
-// TODO: test
-class UserCanAuthorizeRequests implements ValidationRule
-{
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        $authorizingUserRoleIds = User::where('id', '=', $value)->get('users.role_id');
-        $authorizingUsersCount = $authorizingUserRoleIds->count();
-
-        if ($authorizingUsersCount != 1)
-            $fail("The " . $attribute . " field identifies " . $authorizingUsersCount . " users instead of one user.");
-
-        $authorizingUserRole = Role::findOrFail($authorizingUserRoleIds[0]);
-
-        if ($this::canAuthorizeRequests($authorizingUserRole['permissions_code']))
-            $fail("The " . $attribute . "field is not a user that can authorize requests.");
-    }
-
-    private static function canAuthorizeRequests($permissionsCode): bool
-    {
-        return ($permissionsCode >> Role::CAN_AUTHORIZE_REQUESTS_OFFSET) & Role::PERMISSION_MASK;
-    }
-}
+use App\Rules\UserCanAuthorizeRequests;
+use LogicException;
+use Exception;
 
 class RetentionRequestController extends Controller
 {
@@ -87,7 +65,7 @@ class RetentionRequestController extends Controller
             // FIXME: different exceptions for when retention request fails vs when box fails?
             DB::rollBack();
             return response($exception->getMessage(), 400)->header('Content-Type', 'text/plain');
-        } catch (\LogicException $exception) {
+        } catch (LogicException $exception) {
             return response($exception->getMessage(), 207)->header('Content-Type', 'text/plain');
         } catch (TransportException $exception) {
             return response($exception->getMessage(), 207)->header('Content-Type', 'text/plain');
@@ -109,12 +87,12 @@ class RetentionRequestController extends Controller
         // FIXME: does this trigger correctly?
         // FIXME: is this the correct status?
         if ($idValidator->fails())
-            return response($idValidator->errors(), 422)->header('Content-Type', 'text/plain');
+            return response($idValidator->errors(), 302)->header('Content-Type', 'text/plain');
 
         $request->validate([
             'authorizing_user_id' => ['required', 'numeric', 'exists:users,id', new UserCanAuthorizeRequests],
             'boxes' => 'required|array|min:1',
-            'boxes.*.id' => 'required|numeric|exists:boxes,id,retention_request_id,' . $id, // FIXME: does checking the rr id this way work?
+            'boxes.*.id' => 'required|numeric|exists:boxes,id',
             'boxes.*.description' => 'required|string',
             'boxes.*.destroy_date' => 'nullable|date'
         ]);
@@ -145,10 +123,15 @@ class RetentionRequestController extends Controller
             $settings->put('next_tracking_number', $nextTrackingNumber);
 
             DB::commit();
-        } catch (QueryException $exception) {
+        } catch (LogicException $exception) {
+            DB::rollBack();
+            // FIXME: is this the correct way to do this?
+            return redirect()->back()->withErrors(new MessageBag(['boxes.*.id' => $exception->getMessage()]));
+        } catch (Exception $exception) {
             // FIXME: is this the correct exception type?
             // FIXME: different exceptions for when retention request fails vs when box fails?
             DB::rollBack();
+            // FIXME: is there a better way to get an explicit error report?
             return response($exception->getMessage(), 400)->header('Content-Type', 'text/plain');
         }
 
@@ -162,16 +145,22 @@ class RetentionRequestController extends Controller
         $targetBoxCount = count($targetBoxes);
 
         foreach ($originalBoxes as $originalBox) {
+            $box = $originalBox->toArray();
             $box['tracking_number'] = $nextTrackingNumber;
             $nextTrackingNumber++;
 
-            if ($targetBoxIndex < $targetBoxCount && $originalBox['id'] == $targetBoxes[$targetBoxIndex]['id']) {
-                $targetBox = $targetBoxes[$targetBoxIndex];
+            if ($targetBoxIndex < $targetBoxCount) {
+                if ($originalBox['id'] > $targetBoxes[$targetBoxIndex]['id'])
+                    throw new LogicException("Attempted to update a box that doesn't correspond to any box assigned to the retention request that has the give id.");
 
-                $box['description'] = $targetBox['description'];
-                $box['destory_date'] = $targetBox['destory_date'];
+                if ($originalBox['id'] == $targetBoxes[$targetBoxIndex]['id']) {
+                    $targetBox = $targetBoxes[$targetBoxIndex];
 
-                $targetBoxIndex++;
+                    $box['description'] = $targetBox['description'];
+                    $box['destroy_date'] = $targetBox['destroy_date'];
+
+                    $targetBoxIndex++;
+                }
             }
 
             Box::findOrFail($originalBox['id'])->update($box);

@@ -8,13 +8,16 @@ use App\Models\Department;
 use App\Models\RetentionRequest;
 use App\Models\Box;
 use Carbon\Carbon;
+use Database\Seeders\BoxSeeder;
+use Database\Seeders\DepartmentSeeder;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\UserSeeder;
+use Database\Seeders\RetentionRequestSeeder;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Database\Seeders\DepartmentSeeder;
 use Illuminate\Support\Facades\Mail;
+use Spatie\Valuestore\Valuestore;
 
 class RetentionRequestsAPITest extends TestCase
 {
@@ -29,12 +32,31 @@ class RetentionRequestsAPITest extends TestCase
     // FIXME: find a way to pass valid csrf tokens and remove
     use WithoutMiddleware;
 
+    // FIXME: reset tracking number in tear down
+    private $settings = null;
+    private $originalNextTrackingNumber = null;
+
     public function setUp(): void
     {
         parent::setUp();
-        $departmentSeeder = new DepartmentSeeder();
-        $departmentSeeder->run();
+
+        $this->seed(DepartmentSeeder::class);
+        $this->seed(RoleSeeder::class);
+        $this->seed(UserSeeder::class);
+        $this->seed(RetentionRequestSeeder::class);
+        $this->seed(BoxSeeder::class);
+
         Mail::fake();
+
+        $this->settings = Valuestore::make(config_path('settings.json'));
+        $this->originalNextTrackingNumber = $this->settings->get('next_tracking_number');
+        $this->settings->put('next_tracking_number', 1);
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        $this->settings->put('next_tracking_number', $this->originalNextTrackingNumber);
     }
 
     public function testPostNoData()
@@ -423,12 +445,6 @@ class RetentionRequestsAPITest extends TestCase
 
     public function testPostMailSentToRequestorAndValidUsers()
     {
-        $roleSeeder = new RoleSeeder();
-        $roleSeeder->run();
-
-        $userSeeder = new UserSeeder();
-        $userSeeder->run();
-
         $data = [
             'retention_request' => [
                 'manager_name' => 'Dave',
@@ -504,59 +520,322 @@ class RetentionRequestsAPITest extends TestCase
         );
     }
 
+    public function testUpdateNoData()
+    {
+        $this->assertUpdateFailed(
+            '1',
+            [],
+            302,
+            [
+                "authorizing_user_id" => "The authorizing user id field is required.",
+                "boxes" => "The boxes field is required."
+            ]
+        );
+    }
+
     public function testUpdateNoId()
     {
-
+        $this->assertUpdateFailed(
+            '',
+            [
+                "authorizing_user_id" => 3,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            405,
+            []
+        );
     }
 
     public function testUpdateNonNumericId()
     {
-
+        $this->assertUpdateFailed(
+            'x',
+            [
+                "authorizing_user_id" => 3,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            []
+        );
     }
 
     public function testUpdateNonExistentId()
     {
-
+        $this->assertUpdateFailed(
+            '10000',
+            [
+                "authorizing_user_id" => 3,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            []
+        );
     }
 
     public function testUpdateNoAuthorizingUserId()
     {
-
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            []
+        );
     }
 
     public function testUpdateNonNumericAuthorizingUserId()
     {
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 'x',
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["authorizing_user_id" => "The authorizing user id field must be a number."]
+        );
+    }
 
+    public function testUpdateSomeBoxesDontBelongToRetentionRequest()
+    {
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 3,
+                "boxes" => [
+                    [
+                        "id" => 3,
+                        "description" => "Box 3 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 2,
+                        "description" => "Box 2 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.*.id" => "Attempted to update a box that doesn't correspond to any box assigned to the retention request that has the give id."]
+        );
+    }
+
+    public function testUpdateNoBoxesBelongToRetentionRequest()
+    {
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 3,
+                "boxes" => [
+                    [
+                        "id" => 3,
+                        "description" => "Box 3 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 5,
+                        "description" => "Box 5 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 6,
+                        "description" => "Box 6 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.*.id" => "Attempted to update a box that doesn't correspond to any box assigned to the retention request that has the give id."]
+        );
     }
 
     public function testUpdateNonExistentAuthorizingUserId()
     {
-
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 1000000,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["authorizing_user_id" => "The selected authorizing user id is invalid."]
+        );
     }
 
     public function testUpdateUserIsViewer()
     {
-
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 1,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["authorizing_user_id" => "The authorizing_user_id field is not a user that can authorize requests."]
+        );
     }
 
     public function testUpdateUserIsAuthorizer()
     {
-
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 3,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            3,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => 2
+                ],
+                4 => [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    "tracking_number" => 3
+                ]
+            ]
+        );
     }
 
     public function testUpdateUserIsAdmin()
     {
-
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => 2
+                ],
+                4 => [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    "tracking_number" => 3
+                ]
+            ]
+        );
     }
 
     public function testUpdateNoBoxes()
     {
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 4
+            ],
+            302,
+            ["boxes" => "The boxes field is required."]
+        );
+    }
 
+    public function testUpdateEmptyBoxes()
+    {
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 4,
+                "boxes" => []
+            ],
+            302,
+            ["boxes" => "The boxes field is required."]
+        );
     }
 
     public function testUpdateNoBoxId()
     {
-
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.*.id" => "The boxes.0.id field is required."]
+        );
     }
 
     public function testUpdateNonNumericBoxId()
@@ -663,20 +942,65 @@ class RetentionRequestsAPITest extends TestCase
 
     }
 
-    private function assertUpdateSuccessful(string $id, array $data)
+    public function testUpdateMultipleBoxesHaveTheSameId()
     {
-        $response = $this->put('api/retention-requests/' . $id, $data);
-        $response->assertStatus(200);
-        // TODO: finish (tracking number in settings, all boxes in db updated)
+
     }
 
-    // TODO: write fail assertion
+    private function assertUpdateSuccessful(string $id, array $updateData, int $expectedAuthorizingUserId, int $expectedNextTrackingNumber, array $expectedBoxes)
+    {
+        $response = $this->put('api/retention-requests/' . $id, $updateData);
+        $response->assertStatus(200);
+
+        $retentionRequest = RetentionRequest::findOrFail($id);
+        $this->assertEquals($expectedAuthorizingUserId, $retentionRequest->authorizing_user_id);
+
+        $boxes = Box::where('retention_request_id', '=', $id)
+            ->orderBy('id')
+            ->get();
+
+        foreach ($boxes as $box) {
+            $expectedBox = $expectedBoxes[$box->id];
+            $this->assertEquals($expectedBox['tracking_number'], $box->tracking_number);
+            $this->assertEquals($expectedBox['description'], $box->description);
+            $this->assertEquals($expectedBox['destroy_date'], $box->destroy_date);
+            $this->assertEquals($id, $box->retention_request_id);
+        }
+
+        $actualNextTrackingNumber = $this->settings->get('next_tracking_number');
+        $this->assertEquals($expectedNextTrackingNumber, $actualNextTrackingNumber);
+    }
+
+    private function assertUpdateFailed(string $id, array $updateData, int $expectedStatus, array $expectedErrors)
+    {
+        $originalBoxes = Box::where('retention_request_id', '=', $id)
+            ->orderBy('id')
+            ->get();
+
+        $response = $this->put('api/retention-requests/' . $id, $updateData);
+        $response->assertStatus($expectedStatus);
+
+        if (count($expectedErrors) > 0)
+            $response->assertSessionHasErrors($expectedErrors);
+
+        $rolledBackBoxes = Box::where('retention_request_id', '=', $id)
+            ->orderBy('id')
+            ->get();
+
+        // FIXME: is this a valid way to make sure that the boxes in the database were rolled back?
+        $this->assertEquals($originalBoxes, $rolledBackBoxes);
+    }
 
     private function assertPostValidationErrors(array $data, array $errors)
     {
+        $originalBoxCount = Box::count();
+
         $response = $this->post('api/retention-requests', $data);
         $response->assertStatus(302);
         $response->assertSessionHasErrors($errors);
+
+        $rolledBackBoxCount = Box::count();
+        $this->assertEquals($originalBoxCount, $rolledBackBoxCount);
     }
 
     private function assertPostSuccessful(array $data, bool $validDepartmentId = true)
