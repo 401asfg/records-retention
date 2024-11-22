@@ -87,15 +87,24 @@ class RetentionRequestController extends Controller
         // FIXME: does this trigger correctly?
         // FIXME: is this the correct status?
         if ($idValidator->fails())
-            return response($idValidator->errors(), 302)->header('Content-Type', 'text/plain');
+            return redirect()->back()->withErrors($idValidator->errors());
 
-        $request->validate([
-            'authorizing_user_id' => ['required', 'numeric', 'exists:users,id', new UserCanAuthorizeRequests],
-            'boxes' => 'required|array|min:1',
-            'boxes.*.id' => 'required|numeric|exists:boxes,id',
-            'boxes.*.description' => 'required|string',
-            'boxes.*.destroy_date' => 'nullable|date'
-        ]);
+        $requestValidator = Validator::make(
+            [
+                'authorizing_user_id' => $request->input('authorizing_user_id'),
+                'boxes' => $request->input('boxes')
+            ],
+            [
+                'authorizing_user_id' => ['required', 'numeric', 'exists:users,id', new UserCanAuthorizeRequests],
+                'boxes' => 'array',
+                'boxes.*.id' => 'required|numeric|exists:boxes,id',
+                'boxes.*.description' => 'string',
+                'boxes.*.destroy_date' => 'nullable|date'
+            ]
+        );
+
+        if ($requestValidator->fails())
+            return redirect()->back()->withErrors($requestValidator->errors());
 
         // FIXME: do the exceptions created by this need to be handled?
         $settings = Valuestore::make(config_path('settings.json'));
@@ -156,8 +165,11 @@ class RetentionRequestController extends Controller
                 if ($originalBox['id'] == $targetBoxes[$targetBoxIndex]['id']) {
                     $targetBox = $targetBoxes[$targetBoxIndex];
 
-                    $box['description'] = $targetBox['description'];
-                    $box['destroy_date'] = $targetBox['destroy_date'];
+                    if (array_key_exists('description', $targetBox))
+                        $box['description'] = $targetBox['description'];
+
+                    if (array_key_exists('destroy_date', $targetBox))
+                        $box['destroy_date'] = $targetBox['destroy_date'];
 
                     $targetBoxIndex++;
                 }

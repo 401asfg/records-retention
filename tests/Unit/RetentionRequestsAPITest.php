@@ -527,8 +527,7 @@ class RetentionRequestsAPITest extends TestCase
             [],
             302,
             [
-                "authorizing_user_id" => "The authorizing user id field is required.",
-                "boxes" => "The boxes field is required."
+                "authorizing_user_id" => "The authorizing user id field is required."
             ]
         );
     }
@@ -586,7 +585,7 @@ class RetentionRequestsAPITest extends TestCase
                 ]
             ],
             302,
-            []
+            ['id' => 'The selected id is invalid.']
         );
     }
 
@@ -604,7 +603,7 @@ class RetentionRequestsAPITest extends TestCase
                 ]
             ],
             302,
-            []
+            ["authorizing_user_id" => "The authorizing user id field is required."]
         );
     }
 
@@ -803,20 +802,53 @@ class RetentionRequestsAPITest extends TestCase
                 "authorizing_user_id" => 4
             ],
             302,
-            ["boxes" => "The boxes field is required."]
+            ["boxes" => "The boxes field must be an array."]
         );
     }
 
     public function testUpdateEmptyBoxes()
     {
-        $this->assertUpdateFailed(
+        $this->assertUpdateSuccessful(
             '1',
             [
                 "authorizing_user_id" => 4,
                 "boxes" => []
             ],
-            302,
-            ["boxes" => "The boxes field is required."]
+            4,
+            4,
+            [
+                1 => [
+                    "description" => "Test Box 1",
+                    "destroy_date" => "2022-01-01",
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => 2
+                ],
+                3 => [
+                    'description' => "Test Box 3",
+                    'destroy_date' => "2022-03-01",
+                    'retention_request_id' => null
+                ],
+                4 => [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    "tracking_number" => 3
+                ],
+                5 => [
+
+                    'description' => "Test Box 5",
+                    'destroy_date' => "2022-05-01",
+                    "tracking_number" => null
+                ],
+                6 => [
+                    'description' => "Test Box 6",
+                    'destroy_date' => "2022-06-01",
+                    "tracking_number" => null
+                ]
+            ]
         );
     }
 
@@ -834,77 +866,551 @@ class RetentionRequestsAPITest extends TestCase
                 ]
             ],
             302,
-            ["boxes.*.id" => "The boxes.0.id field is required."]
+            ["boxes.0.id" => "The boxes.0.id field is required."]
         );
     }
 
     public function testUpdateNonNumericBoxId()
     {
-
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => "x",
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.0.id" => "The boxes.0.id field must be a number."]
+        );
     }
 
     public function testUpdateNonExistentBoxId()
     {
-
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 10000000000,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.0.id" => "The selected boxes.0.id is invalid."]
+        );
     }
 
     public function testUpdateNoDescription()
     {
-
-    }
-    public function testUpdateNoDestroyDate()
-    {
-
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 2,
+                        'destroy_date' => "2043-02-01"
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2043-02-01",
+                    "tracking_number" => 2
+                ],
+                4 => [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    "tracking_number" => 3
+                ]
+            ]
+        );
     }
 
     public function testUpdateNullDestroyDate()
     {
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 2,
+                        "description" => "Box 2 description",
+                        'destroy_date' => null
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    "description" => "Box 2 description",
+                    'destroy_date' => null,
+                    "tracking_number" => 2
+                ],
+                4 => [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    "tracking_number" => 3
+                ]
+            ]
+        );
+    }
 
+    public function testUpdateNoDestroyDate()
+    {
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 2,
+                        "description" => "Box 2 description"
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    "description" => "Box 2 description",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => 2
+                ],
+                4 => [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    "tracking_number" => 3
+                ]
+            ]
+        );
     }
 
     public function testUpdateNonDateDestroyDate()
     {
-
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 2,
+                        "description" => "Box 2 description",
+                        "destroy_date" => 'x'
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.1.destroy_date" => "The boxes.1.destroy_date field must be a valid date."]
+        );
     }
 
-    public function testUpdateIncorrectlyFormattedDestroyDate()
+    public function testUpdateDayMonthYearFormattedDestroyDate()
     {
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 2,
+                        "description" => "Box 2 description",
+                        "destroy_date" => '31-12-2022'
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    "description" => "Box 2 description",
+                    "destroy_date" => '31-12-2022',
+                    "tracking_number" => 2
+                ],
+                4 => [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    "tracking_number" => 3
+                ]
+            ]
+        );
+    }
 
+    public function testUpdateMonthDayYearFormattedDestroyDate()
+    {
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 2,
+                        "description" => "Box 2 description",
+                        "destroy_date" => '12-31-2022'
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.1.destroy_date" => "The boxes.1.destroy_date field must be a valid date."]
+        );
     }
 
     public function testUpdateWithOneBox()
     {
-
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => 2
+                ],
+                4 => [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    "tracking_number" => 3
+                ]
+            ]
+        );
     }
 
     public function testUpdateWithMultipleBoxes()
     {
-
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 4,
+                        "description" => "Box 4 description",
+                        "destroy_date" => '2022-12-12'
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    "description" => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => 2
+                ],
+                4 => [
+                    "description" => "Box 4 description",
+                    "destroy_date" => '2022-12-12',
+                    "tracking_number" => 3
+                ]
+            ]
+        );
     }
 
-    public function testUpdateNoSettingsFile()
+    public function testUpdateRetentionRequestWithOneBox()
     {
-
-    }
-
-    public function testUpdateNoNextTrackingNumberInSettingsFile()
-    {
-
+        $this->assertUpdateSuccessful(
+            '3',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 5,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            6,
+            2,
+            [
+                1 => [
+                    "description" => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    "tracking_number" => null
+                ],
+                2 => [
+                    "description" => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => null
+                ],
+                3 => [
+                    "description" => "Test Box 3",
+                    'destroy_date' => "2022-03-01",
+                    "tracking_number" => null
+                ],
+                4 => [
+                    "description" => "Test Box 4",
+                    "destroy_date" => '2022-04-01',
+                    "tracking_number" => null
+                ],
+                5 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                6 => [
+                    "description" => "Test Box 6",
+                    "destroy_date" => '2022-06-01',
+                    "tracking_number" => null
+                ]
+            ]
+        );
     }
 
     public function testUpdateOneBoxInDBOneBoxUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            6,
+            2,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ]
+            ]
+        );
     }
 
     public function testUpdateMultipleBoxesInDBOneBoxUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            6,
+            3,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => 2
+                ]
+            ]
+        );
     }
 
     public function testUpdateMultipleBoxesInDBMultipleBoxesUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 3",
+                    'destroy_date' => "2022-03-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 3,
+                        "description" => "Box 3 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => 2
+                ],
+                3 => [
+                    "description" => "Box 3 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 3
+                ]
+            ]
+        );
     }
 
     public function testUpdateMultipleBoxesInDBAllBoxesUpdated()
@@ -945,6 +1451,35 @@ class RetentionRequestsAPITest extends TestCase
     public function testUpdateMultipleBoxesHaveTheSameId()
     {
 
+    }
+
+    public function testUpdateDoesntAffectBoxesThatBelongToDifferentRetentionRequest()
+    {
+
+    }
+
+    public function testUpdateNoSettingsFile()
+    {
+
+    }
+
+    public function testUpdateNoNextTrackingNumberInSettingsFile()
+    {
+
+    }
+
+    private function reseedDB(array $retentionRequests, array $boxes)
+    {
+        RetentionRequest::truncate();
+        Box::truncate();
+
+        foreach ($retentionRequests as $retentionRequest) {
+            RetentionRequest::create($retentionRequest);
+        }
+
+        foreach ($boxes as $box) {
+            Box::create($box);
+        }
     }
 
     private function assertUpdateSuccessful(string $id, array $updateData, int $expectedAuthorizingUserId, int $expectedNextTrackingNumber, array $expectedBoxes)
