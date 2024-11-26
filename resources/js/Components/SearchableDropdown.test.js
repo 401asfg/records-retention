@@ -342,6 +342,8 @@ describe(SearchableDropdown, () => {
             expectOnlyDropdownItemHighlighted(0);
         })
 
+        // TODO: finish rest
+
         // it("should highlight the next item and unhighlight the first item in the dropdown when the cursor moves to it from the first item", async () => {
         //     mockAxiosResponse("o");
         //     await type("o");

@@ -1415,57 +1415,460 @@ class RetentionRequestsAPITest extends TestCase
 
     public function testUpdateMultipleBoxesInDBAllBoxesUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 3",
+                    'destroy_date' => "2022-03-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 2,
+                        "description" => "Box 2 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 3,
+                        "description" => "Box 3 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    "description" => "Box 2 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 2
+                ],
+                3 => [
+                    "description" => "Box 3 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 3
+                ]
+            ]
+        );
     }
 
     public function testUpdateOneBoxInDBInvalidBoxUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 2,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.0.id" => "The selected boxes.0.id is invalid."]
+        );
     }
 
     public function testUpdateOneBoxInDBMultipleInvalidBoxesUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 2,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 4,
+                        "description" => "Box 3 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            [
+                "boxes.0.id" => "The selected boxes.0.id is invalid.",
+                "boxes.1.id" => "The selected boxes.1.id is invalid."
+            ]
+        );
     }
 
     public function testUpdateOneBoxInDBSomeInvalidBoxesUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 2,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 4,
+                        "description" => "Box 3 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 1,
+                        "description" => "Box 2 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            [
+                "boxes.0.id" => "The selected boxes.0.id is invalid.",
+                "boxes.1.id" => "The selected boxes.1.id is invalid."
+            ]
+        );
     }
 
     public function testUpdateMultipleBoxesInDBInvalidBoxUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 4,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.0.id" => "The selected boxes.0.id is invalid."]
+        );
     }
 
     public function testUpdateMultipleBoxesInDBMultipleInvalidBoxesUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 3",
+                    'destroy_date' => "2022-03-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 8,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 9,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            [
+                "boxes.0.id" => "The selected boxes.0.id is invalid.",
+                "boxes.1.id" => "The selected boxes.1.id is invalid."
+            ]
+        );
     }
 
     public function testUpdateMultipleBoxesInDBSomeInvalidBoxesUpdated()
     {
+        $this->reseedDB(
+            [
+                [
+                    'manager_name' => "Test Manager 1",
+                    'requestor_name' => "Test Requestor 1",
+                    'requestor_email' => "test_requestor_one@gmail.com",
+                    'department_id' => 1
+                ]
+            ],
+            [
+                [
+                    'description' => "Test Box 1",
+                    'destroy_date' => "2022-01-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 3",
+                    'destroy_date' => "2022-03-01",
+                    'retention_request_id' => 1
+                ],
+                [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    'retention_request_id' => 1
+                ]
+            ]
+        );
 
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 8,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 9,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            [
+                "boxes.0.id" => "The selected boxes.0.id is invalid.",
+                "boxes.1.id" => "The selected boxes.1.id is invalid."
+            ]
+        );
     }
 
     public function testUpdateMultipleBoxesHaveTheSameId()
     {
-
+        $this->assertUpdateFailed(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ],
+                    [
+                        "id" => 1,
+                        "description" => "Box 2 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            302,
+            ["boxes.*.id" => "Attempted to update a box that doesn't correspond to any box assigned to the retention request that has the give id."]
+        );
     }
 
     public function testUpdateDoesntAffectBoxesThatBelongToDifferentRetentionRequest()
     {
-
+        $this->assertUpdateSuccessful(
+            '1',
+            [
+                "authorizing_user_id" => 6,
+                "boxes" => [
+                    [
+                        "id" => 1,
+                        "description" => "Box 1 description",
+                        "destroy_date" => Carbon::today()
+                    ]
+                ]
+            ],
+            6,
+            4,
+            [
+                1 => [
+                    "description" => "Box 1 description",
+                    "destroy_date" => Carbon::today(),
+                    "tracking_number" => 1
+                ],
+                2 => [
+                    'description' => "Test Box 2",
+                    'destroy_date' => "2022-02-01",
+                    "tracking_number" => 2
+                ],
+                3 => [
+                    'description' => "Test Box 3",
+                    'destroy_date' => "2022-03-01",
+                    "tracking_number" => null
+                ],
+                4 => [
+                    'description' => "Test Box 4",
+                    'destroy_date' => "2022-04-01",
+                    "tracking_number" => 3
+                ],
+                5 => [
+                    'description' => "Test Box 5",
+                    'destroy_date' => "2022-05-01",
+                    "tracking_number" => null
+                ],
+                6 => [
+                    'description' => "Test Box 6",
+                    'destroy_date' => "2022-06-01",
+                    "tracking_number" => null
+                ]
+            ]
+        );
     }
 
     public function testUpdateNoSettingsFile()
     {
-
+        // TODO: implement
     }
 
     public function testUpdateNoNextTrackingNumberInSettingsFile()
     {
-
+        // TODO: implement
     }
 
     private function reseedDB(array $retentionRequests, array $boxes)

@@ -21,9 +21,6 @@ use Exception;
 
 class RetentionRequestController extends Controller
 {
-    // TODO: test that all admins and authorizors that haven't opted out of receiving emails get sent emails
-    // TODO: test that the requestor recieves their email
-
     public function store(Request $request)
     {
         $request->validate([
