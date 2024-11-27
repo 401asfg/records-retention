@@ -100,6 +100,7 @@ const SearchableDropdown = (props) => {
     return (
         <div className="position-relative w-100">
             <input
+                id={props.id}
                 type="text"
                 placeholder="Search..."
                 className="w-100"

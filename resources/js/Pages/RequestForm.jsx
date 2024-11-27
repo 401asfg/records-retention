@@ -133,6 +133,7 @@ const RequestForm = () => {
                     <div className="col-sm-6 col-12 mt-3">
                         <label htmlFor="department" className="row"><strong>Department</strong></label>
                         <SearchableDropdown
+                            id="department"
                             sourceRoute="api/departments"
                             selectedOptionId={departmentId}
                             setSelectedOptionId={setDepartmentId}

@@ -181,15 +181,16 @@ class RetentionRequestController extends Controller
     // FIXME: handle failure case
     private static function emailInvolvedParties($requestor, $authorizers)
     {
+        // FIXME: queue emails
         $requestorName = $requestor['name'];
         $requestorEmail = $requestor['email'];
 
-        Mail::to($requestorEmail)->send(new RetentionRequestSuccessfullySubmitted([
+        Mail::to($requestorEmail)->queue(new RetentionRequestSuccessfullySubmitted([
             "name" => $requestorName
         ]));
 
         foreach ($authorizers as $authorizer) {
-            Mail::to($authorizer['email'])->send(new PendingRecordRetentionRequest([
+            Mail::to($authorizer['email'])->queue(new PendingRecordRetentionRequest([
                 "authorizer_name" => $authorizer['name'],
                 "requestor_name" => $requestorName,
                 "requestor_email" => $requestorEmail,

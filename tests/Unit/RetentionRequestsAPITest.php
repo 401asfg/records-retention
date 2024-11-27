@@ -22,6 +22,7 @@ use Spatie\Valuestore\Valuestore;
 class RetentionRequestsAPITest extends TestCase
 {
     // TODO: test transactions?
+    // TODO: test emails queued?
     // TODO: test network errors?
     // TODO: test database failures?
     // TODO: test sql injection attacks?
