@@ -9,11 +9,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 // TODO: test router
 
 const App = () => {
+    const data = JSON.parse(document.getElementById("data").getAttribute("data"));
+
     return (
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<RequestForm />} />
-                <Route path="/retention-requests" element={<PendingRequests />} />
+                <Route path="/retention-requests" element={<PendingRequests retentionRequests={data} />} />
             </Routes>
         </BrowserRouter>
     );

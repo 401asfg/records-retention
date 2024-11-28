@@ -7,10 +7,10 @@ use App\Http\Controllers\RetentionRequestController;
 // FIXME: default to 404 page
 // FIXME: go to error page on database connection issues
 
-Route::post('retention-requests', [RetentionRequestController::class, 'index']);
+Route::get('retention-requests', [RetentionRequestController::class, 'index']);
 
 Route::get('{pageRoute}', function () {
-    return view('app');
+    return view('app')->with("data", "");
 })->where('pageRoute', '^((?!api).)*$');
 
 Route::post('api/retention-requests', [RetentionRequestController::class, 'store']);

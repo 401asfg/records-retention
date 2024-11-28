@@ -25,10 +25,9 @@ class RetentionRequestController extends Controller
     // TODO: test
     public function index()
     {
-        // FIXME: does this return the most recent requests first?
-        $retentionRequests = RetentionRequestResource::collection(RetentionRequest::all()->orderBy('created_at', 'desc'));
-        // FIXME: attach retention requests to view as json, retrieve with app.js, decode and send to pending requests
-        return view('app');
+        // FIXME: handle failure case
+        $retentionRequests = RetentionRequestResource::collection(RetentionRequest::all()->sortByDesc('created_at'));
+        return view('app')->with('data', json_encode($retentionRequests));
     }
 
     public function store(Request $request)
