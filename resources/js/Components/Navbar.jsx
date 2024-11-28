@@ -1,7 +1,9 @@
+// TODO: test
+
 const Navbar = (props) => {
     return (
         <div>
-            <nav className="navbar navbar-expand-lg navbar-light bg-light p-0">
+            <nav className="navbar navbar-expand navbar-light bg-light p-0">
                 <div className="col-4">
 
                 </div>

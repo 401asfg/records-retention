@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\RetentionRequestResource;
 use App\Mail\PendingRecordRetentionRequest;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Mail;
@@ -21,6 +22,15 @@ use Exception;
 
 class RetentionRequestController extends Controller
 {
+    // TODO: test
+    public function index()
+    {
+        // FIXME: does this return the most recent requests first?
+        $retentionRequests = RetentionRequestResource::collection(RetentionRequest::all()->orderBy('created_at', 'desc'));
+        // FIXME: attach retention requests to view as json, retrieve with app.js, decode and send to pending requests
+        return view('app');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
