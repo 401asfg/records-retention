@@ -26,8 +26,12 @@ class RetentionRequestController extends Controller
     public function index()
     {
         // FIXME: handle failure case
-        $retentionRequests = RetentionRequestResource::collection(RetentionRequest::all()->sortByDesc('created_at'));
-        return view('app')->with('data', json_encode($retentionRequests));
+        $retentionRequests = RetentionRequest::whereNull('authorizing_user_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $retentionRequestCollection = RetentionRequestResource::collection($retentionRequests);
+        return view('app')->with('data', json_encode($retentionRequestCollection));
     }
 
     public function store(Request $request)

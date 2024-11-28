@@ -16,6 +16,7 @@ class RetentionRequestResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'requestor_name' => $this->requestor_name,
             'department_name' => Department::find($this->department_id)->name,
             'created_at' => $this->created_at
