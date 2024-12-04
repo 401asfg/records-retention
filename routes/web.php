@@ -8,9 +8,10 @@ use App\Http\Controllers\RetentionRequestController;
 // FIXME: go to error page on database connection issues
 
 Route::get('retention-requests', [RetentionRequestController::class, 'index']);
+Route::get('retention-requests/{id}/edit', [RetentionRequestController::class, 'edit']);
 
 Route::get('{pageRoute}', function () {
-    return view('app')->with("data", "");
+    return view('app')->with("data", "{}");
 })->where('pageRoute', '^((?!api).)*$');
 
 Route::post('api/retention-requests', [RetentionRequestController::class, 'store']);

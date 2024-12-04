@@ -1,10 +1,14 @@
 import Box from "./Box";
 import React, { useRef } from 'react';
 
+// TODO: test adding and removing boxes, and those buttons being present, when initNextBoxId is undefined
+
 const BoxList = (props) => {
     const nextBoxId = useRef(props.initNextBoxId);
 
     const addBox = () => {
+        if (props.initNextBoxId === undefined) return;
+
         props.setBoxes([...props.boxes, {
             id: nextBoxId.current,
             description: "",
@@ -15,6 +19,7 @@ const BoxList = (props) => {
     }
 
     const removeBox = (index) => {
+        if (props.initNextBoxId === undefined) return;
         props.setBoxes([...props.boxes.slice(0, index), ...props.boxes.slice(index + 1)]);
     }
 
@@ -55,19 +60,26 @@ const BoxList = (props) => {
                     box={box}
                     setDescription={(value) => setBoxDescription(i, value)}
                     setDestroyDate={(value) => setBoxDestroyDate(i, value)}
-                    remove={i === 0 ? null : () => removeBox(i)}
+                    remove={(i === 0 || props.initNextBoxId === undefined) ? null : () => removeBox(i)}
+                    isInitFinalDispositionBasedOnDestroyDate={
+                        props.isInitFinalDispositionBasedOnDestroyDates === undefined
+                        ? false
+                        : props.isInitFinalDispositionBasedOnDestroyDates
+                    }
                 />
             )}
-            <div className="row justify-content-center">
-                <button
-                    onClick={addBox}
-                    type="button"
-                    id="add-box"
-                    className="rounded-circle"
-                    style={{width: "40px", height: "40px"}}
-                    data-testid="add-box"
-                >+</button>
-            </div>
+            {props.initNextBoxId !== undefined &&
+                <div className="row justify-content-center">
+                    <button
+                        onClick={addBox}
+                        type="button"
+                        id="add-box"
+                        className="rounded-circle"
+                        style={{width: "40px", height: "40px"}}
+                        data-testid="add-box"
+                    >+</button>
+                </div>
+            }
         </div>
     );
 }

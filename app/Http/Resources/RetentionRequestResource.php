@@ -17,9 +17,11 @@ class RetentionRequestResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'requestor_name' => $this->requestor_name,
-            'department_name' => Department::find($this->department_id)->name,
-            'created_at' => $this->created_at
+            'requestorName' => $this->requestor_name,
+            'requestorEmail' => $this->requestor_email,
+            'managerName' => $this->manager_name,
+            'departmentName' => Department::find($this->department_id)->name,
+            'createdAt' => $this->created_at
         ];
     }
 }

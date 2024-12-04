@@ -17,7 +17,6 @@ const RequestForm = () => {
     const COOKIE_OPTIONS = { maxAge: 1209600 }; // two weeks (60 * 60 * 24 * 14)
     const [cookies, setCookie] = useCookies();
 
-    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const MAIL_FAILURE_RESPONSE_STATUS = 207;
 
     const MODAL_NONE = 0;
@@ -64,7 +63,6 @@ const RequestForm = () => {
             }})
         }
 
-        axios.defaults.headers.common['X-CSRF-TOKEN'] = CSRF_TOKEN;
         submissionError.current = null;
 
         // TODO: test failure case

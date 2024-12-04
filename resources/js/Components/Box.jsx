@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 
 // TODO: test
+// TODO: test isInitFinalDispositionBasedOnDestroyDate
 // TODO: add fade in and fade out when box is added and removed respectively
 
 const Box = (props) => {
     const FINAL_DISPOSITION_SHRED = "shred";
     const FINAL_DISPOSITION_PERMANENT_STORAGE = "permanent_storage";
 
-    const [finalDisposition, setFinalDisposition] = useState(FINAL_DISPOSITION_SHRED);
+    const [finalDisposition, setFinalDisposition] = useState(
+        props.isInitFinalDispositionBasedOnDestroyDate
+        ? (props.box.destroyDate === null ? FINAL_DISPOSITION_PERMANENT_STORAGE : FINAL_DISPOSITION_SHRED)
+        : FINAL_DISPOSITION_SHRED
+    );
 
     const onFinalDispositionChange = (event) => {
         setFinalDisposition(event.target.value);

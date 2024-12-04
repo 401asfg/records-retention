@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BoxResource;
 use App\Http\Resources\RetentionRequestResource;
 use App\Mail\PendingRecordRetentionRequest;
 use Illuminate\Database\QueryException;
@@ -27,11 +28,29 @@ class RetentionRequestController extends Controller
     {
         // FIXME: handle failure case
         $retentionRequests = RetentionRequest::whereNull('authorizing_user_id')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         $retentionRequestCollection = RetentionRequestResource::collection($retentionRequests);
         return view('app')->with('data', json_encode($retentionRequestCollection));
+    }
+
+    // TODO: test
+    public function edit(string $id)
+    {
+        // FIXME: handle failure case
+        $retentionRequest = RetentionRequest::findOrFail($id);
+        $boxes = Box::where('retention_request_id', '=', $id)->get();
+
+        $retentionRequestResource = new RetentionRequestResource($retentionRequest);
+        $boxCollection = BoxResource::collection($boxes);
+
+        $data = [
+            'retentionRequest' => $retentionRequestResource,
+            'boxes' => $boxCollection
+        ];
+
+        return view('app')->with('data', json_encode($data));
     }
 
     public function store(Request $request)
