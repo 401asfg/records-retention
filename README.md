@@ -18,6 +18,14 @@ Bash
 docker exec laravel-app php artisan test
 ```
 
+## Testing the App's React Components
+To test the functionality of the app's frontend components and pages in the correct Docker environment, run the following command
+
+Bash
+```
+docker exec laravel-app npm test
+```
+
 ## Access the MySQL Database
 To access the MySQL database, after running the app in docker, run the following command
 
