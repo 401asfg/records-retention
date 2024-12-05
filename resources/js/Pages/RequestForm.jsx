@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
 import SearchableDropdown from "../Components/SearchableDropdown";
@@ -66,16 +65,22 @@ const RequestForm = () => {
         submissionError.current = null;
 
         // TODO: test failure case
-        axios.post('api/retention-requests', data)
-            .then((res) => {
-                if (res.status === MAIL_FAILURE_RESPONSE_STATUS) submissionError.current = res.data;
-                setOpenModal(MODAL_SUBMISSION_SUCCESSFUL);
-            })
-            .catch((error) => {
-                console.log(error);
-                submissionError.current = error.response.data;
-                setOpenModal(MODAL_SUBMISSION_FAILED);
-            });
+        fetch('api/retention-requests', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then((res) => {
+            if (res.status === MAIL_FAILURE_RESPONSE_STATUS) submissionError.current = res.data;
+            setOpenModal(MODAL_SUBMISSION_SUCCESSFUL);
+        }).catch((error) => {
+            console.log(error);
+            submissionError.current = error.response.data;
+            setOpenModal(MODAL_SUBMISSION_FAILED);
+        });
     }
 
     const confirm = () => {

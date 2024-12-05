@@ -41,3 +41,7 @@ Bash
 ```
 docker compose down
 ```
+
+## NOTE
+See Records Project Design.xlsx for details on my high level plans for the various frontend, backend, and database components of this project
+See Judith Records request.pdf for an example of a legacy retention request

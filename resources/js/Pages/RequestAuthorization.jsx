@@ -4,7 +4,6 @@ import Modal from "../Components/Modal";
 
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from "react-router-dom";
-import axios from 'axios';
 
 // TODO: test
 
@@ -46,17 +45,24 @@ const RequestAuthorization = (props) => {
         submissionError.current = null;
 
         // TODO: test failure case
-        // FIXME: doesn't use base url, appends to current url
-        axios.put('/api/retention-requests/' + id, data)
-            .then((res) => {
-                if (res.status === MAIL_FAILURE_RESPONSE_STATUS) submissionError.current = res.data;
-                setOpenModal(MODAL_AUTHORIZATION_SUCCESSFUL);
-            })
-            .catch((error) => {
-                console.log(error);
-                submissionError.current = error.response.data;
-                setOpenModal(MODAL_AUTHORIZATION_FAILED);
-            });
+        // FIXME: THIS FETCH CALL SENDS THE PUT REQUEST TO THE CURRENT PAGE, NOT THE PAGE SPECIFIED IN THE ROUTE
+        fetch("/api/retention-requests/" + id, {
+            method: 'PUT',
+            headers: {
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then((res) => {
+            console.log(res);
+            if (res.status === MAIL_FAILURE_RESPONSE_STATUS) submissionError.current = res.data;
+            setOpenModal(MODAL_AUTHORIZATION_SUCCESSFUL);
+        }).catch((error) => {
+            console.log(error);
+            submissionError.current = error.response.data;
+            setOpenModal(MODAL_AUTHORIZATION_FAILED);
+        });
     }
 
     const confirm = () => {
