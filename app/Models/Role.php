@@ -19,6 +19,9 @@ class Role extends Model
     ];
 
     // TODO: test
+    // PRODUCES A NUMBER THAT REPRESENTS THE PERMISSIONS
+    // FOR EXAMPLE: 5 = 101 = CAN RECEIVE EMAILS AND CAN CHANGE USER ROLES
+    // FOR EXAMPLE: 3 = 011 = CAN AUTHORIZE REQUESTS AND CAN CHANGE USER ROLES
     public static function encodePermissions(bool $canReceiveEmails, bool $canAuthorizeRequests, bool $canChangeUserRoles): int
     {
         return ($canChangeUserRoles << Role::CAN_CHANGE_USER_ROLES_OFFSET)

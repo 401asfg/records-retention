@@ -142,6 +142,8 @@ class RetentionRequestController extends Controller
             return response("settings.json doesn't contain the next_tracking_number field.", 400)->header('Content-Type', 'text/plain');
 
         $requestBoxes = $request->input('boxes');
+
+        // ORDER THE UPDATE REQUEST BOXES AND THE DB BOXES BY ID
         usort($requestBoxes, function ($a, $b) {
             return $a['id'] <=> $b['id'];   // FIXME: is the right order in which to sort? (asc?)
         });
@@ -150,6 +152,7 @@ class RetentionRequestController extends Controller
         // FIXME: do the exceptions created by this need to be handled?
         $nextTrackingNumber = $settings->get('next_tracking_number');   // FIXME: is this going to be returned as an int?
 
+        // ASSIGN THE USER ID TO THE RETENTION REQUEST, UPDATE THE DB BOXES WITH THE REQUEST BOX DATA, ASSIGN EACH DB BOX A TRACKING NUMBER
         try {
             DB::beginTransaction();
 
@@ -176,6 +179,9 @@ class RetentionRequestController extends Controller
         return response(['status' => 'success'], 200)->header('Content-Type', 'text/plain');
     }
 
+    // ASSUMES THAT THE ORIGINAL AND TARGET BOXES ARE ORDERED BY ID; THERE ISN'T NECESSARILY A 1-1 CORRESPONDENCE BETWEEN THE TWO
+    // ASSUMES THAT THE ORIGINAL BOXES PARAMETER CONTAINS ALL THE BOXES IN THE DB FOR A RETENTION REQUEST
+    // PRODUCES THE NEW NEXT UNIQUE TRACKING NUMBER, AFTER ALL DB BOXES HAVE BEEN ASSIGNED A UNIQUE TRACKING NUMBER
     private static function updateBoxes($originalBoxes, $targetBoxes, $initNextTrackingNumber): int
     {
         $nextTrackingNumber = $initNextTrackingNumber;
@@ -211,6 +217,7 @@ class RetentionRequestController extends Controller
     }
 
     // FIXME: handle failure case
+    // NOTIFIES REQUESTOR AND ALL USERS WHO CAN AUTHORIZE RECORD RETENTION REQUESTS THAT A NEW REQUEST HAS BEEN SUBMITTED
     private static function emailInvolvedParties($requestor, $authorizers)
     {
         // FIXME: queue emails
@@ -231,6 +238,7 @@ class RetentionRequestController extends Controller
     }
 
     // FIXME: handle failure case
+    // PRODUCES A LIST OF ALL USERS WHO CAN AUTHORIZE RECORD RETENTION REQUESTS AND HAVE OPTED INTO RECEIVEING EMAILS
     private static function getUserMailingList()
     {
         // FIXME: need to modify users and roles tables to match this specification
@@ -238,8 +246,8 @@ class RetentionRequestController extends Controller
             ->select(['users.name AS name', 'users.email AS email'])
             ->join('roles', 'users.role_id', '=', 'roles.id')
             ->whereRaw(
-                "users.is_receiving_emails = 1 AND (roles.permissions_code >> ?) & ? = 1",
-                [Role::CAN_RECIEVE_EMAILS_OFFSET, Role::PERMISSION_MASK]
+                "users.is_receiving_emails = 1 AND (roles.permissions_code >> ?) & ? = 1",  // DECODES THE PERMISSIONS FROM THE NUMERIC CODE VALUE (FOR EXAMPLE: 5 = 101 = CAN RECEIVE EMAILS AND CAN CHANGE USER ROLES)
+                [Role::CAN_RECIEVE_EMAILS_OFFSET, Role::PERMISSION_MASK]    // ONLY RETRIEVES USERS WHO HAVE A ROLE WITH EMAIL RECEIVING PERMISSIONS
             )
             ->get();
 

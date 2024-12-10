@@ -11,7 +11,7 @@ const PendingRequests = (props) => {
                 <div className="row">
                     {props.retentionRequests.map((retentionRequest) =>
                         <div className="col-md-4 col-12 justify-content-center">
-                            <PendingRetentionRequest retentionRequest={retentionRequest} />
+                            <PendingRetentionRequest key={retentionRequest.id} retentionRequest={retentionRequest} />
                         </div>
                     )}
                 </div>
