@@ -46,7 +46,7 @@ const RequestAuthorization = (props) => {
 
         // TODO: test failure case
         // FIXME: THIS FETCH CALL SENDS THE PUT REQUEST TO THE CURRENT PAGE, NOT THE PAGE SPECIFIED IN THE ROUTE
-        fetch("/api/retention-requests/" + id, {
+        fetch(`${window.location.origin}/api/retention-requests/${id}`, {
             method: 'PUT',
             headers: {
                 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

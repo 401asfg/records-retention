@@ -1,6 +1,8 @@
-## Setting up the .env file
+## Setting up the environment variables
 Copy the .env.example file and name it ".env".
 Fill out the variables (such as DB_HOST=) with the values you wish to use for this project.
+
+When each box is approved, it is assigned a unique tracking number. This tracking number is automatically incremented for every new box approved. To specify the initial tracking number used, open config/settings.json, and set the "next_tracking_number" variable to your desired initial tracking number. This is where the current tracking number is stored, retrieved from, and is what will be incremented every time a box is given a new tracking number.
 
 ## Running the App
 Run the following command to launch a nginx server to locally host the app, a mysql database to store the apps data, and the app itself
