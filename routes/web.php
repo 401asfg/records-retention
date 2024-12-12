@@ -16,6 +16,7 @@ Route::get('{pageRoute}', function () {
 
 Route::post('api/retention-requests', [RetentionRequestController::class, 'store']);
 Route::put('api/retention-requests/{id}', [RetentionRequestController::class, 'update']);
+Route::put('api/retention-requests/{id}/authorize', [RetentionRequestController::class, 'authorize']);
 
 Route::get('api/departments', [DepartmentController::class, 'index']);
 Route::get('api/departments/{id}', [DepartmentController::class, 'show']);

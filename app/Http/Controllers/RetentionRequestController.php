@@ -104,19 +104,48 @@ class RetentionRequestController extends Controller
         return response(['status' => 'success'], 200)->header('Content-Type', 'text/plain');
     }
 
-    // TODO: test
     public function update(string $id, Request $request)
     {
         // FIXME: use verification token for user instead of id
 
-        $idValidator = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|exists:retention_requests,id'
-        ]);
+        $idValidator = $this::idValidator($id);
 
         // FIXME: does this trigger correctly?
         // FIXME: is this the correct status?
         if ($idValidator->fails())
-            return redirect()->back()->withErrors($idValidator->errors());
+            return response($idValidator->errors(), 400)->header('Content-Type', 'text/plain');
+
+        $requestValidator = Validator::make(
+            [
+                'boxes' => $request->input('boxes')
+            ],
+            [
+                'boxes' => 'array',
+                'boxes.*.id' => 'required|numeric|exists:boxes,id',
+                'boxes.*.description' => 'string',
+                'boxes.*.destroy_date' => 'nullable|date'
+            ]
+        );
+
+        if ($requestValidator->fails())
+            return response($requestValidator->errors(), 400)->header('Content-Type', 'text/plain');
+
+        return $this::updateRetentionRequest($id, $request, function ($id, $request, $dbBoxes, $requestBoxes) {
+            $this::updateBoxes($dbBoxes, $requestBoxes);
+        });
+    }
+
+    // TODO: test
+    public function authorize(string $id, Request $request)
+    {
+        // FIXME: use verification token for user instead of id
+
+        $idValidator = $this::idValidator($id);
+
+        // FIXME: does this trigger correctly?
+        // FIXME: is this the correct status?
+        if ($idValidator->fails())
+            return response($idValidator->errors(), 400)->header('Content-Type', 'text/plain');
 
         $requestValidator = Validator::make(
             [
@@ -133,14 +162,29 @@ class RetentionRequestController extends Controller
         );
 
         if ($requestValidator->fails())
-            return redirect()->back()->withErrors($requestValidator->errors());
+            return response($requestValidator->errors(), 400)->header('Content-Type', 'text/plain');
 
-        // FIXME: do the exceptions created by this need to be handled?
-        $settings = Valuestore::make(config_path('settings.json'));
+        return $this::updateRetentionRequest($id, $request, function ($id, $request, $dbBoxes, $requestBoxes) {
+            // FIXME: do the exceptions created by this need to be handled?
+            $settings = Valuestore::make(config_path('settings.json'));
 
-        if (!$settings->has('next_tracking_number'))
-            return response("settings.json doesn't contain the next_tracking_number field.", 400)->header('Content-Type', 'text/plain');
+            if (!$settings->has('next_tracking_number'))
+                throw new Exception("settings.json doesn't contain the next_tracking_number field.");
 
+            // FIXME: do the exceptions created by this need to be handled?
+            $nextTrackingNumber = $settings->get('next_tracking_number');   // FIXME: is this going to be returned as an int?
+
+            $nextTrackingNumber = $this::updateBoxes($dbBoxes, $requestBoxes, $nextTrackingNumber);
+            RetentionRequest::findOrFail($id)->update(['authorizing_user_id' => $request->input('authorizing_user_id')]);
+
+            // FIXME: handle put exceptions
+            // FIXME: move this into update?
+            $settings->put('next_tracking_number', $nextTrackingNumber);
+        });
+    }
+
+    private static function updateRetentionRequest($id, $request, $update)
+    {
         $requestBoxes = $request->input('boxes');
 
         // ORDER THE UPDATE REQUEST BOXES AND THE DB BOXES BY ID
@@ -149,25 +193,19 @@ class RetentionRequestController extends Controller
         });
 
         $dbBoxes = Box::where("retention_request_id", "=", $id)->orderBy('id')->get('id');
-        // FIXME: do the exceptions created by this need to be handled?
-        $nextTrackingNumber = $settings->get('next_tracking_number');   // FIXME: is this going to be returned as an int?
 
         // ASSIGN THE USER ID TO THE RETENTION REQUEST, UPDATE THE DB BOXES WITH THE REQUEST BOX DATA, ASSIGN EACH DB BOX A TRACKING NUMBER
         try {
             DB::beginTransaction();
-
-            $nextTrackingNumber = $this::updateBoxes($dbBoxes, $requestBoxes, $nextTrackingNumber);
-            RetentionRequest::findOrFail($id)->update(['authorizing_user_id' => $request->input('authorizing_user_id')]);
-
-            // FIXME: handle put exceptions
-            // FIXME: move this into update?
-            $settings->put('next_tracking_number', $nextTrackingNumber);
-
+            $update($id, $request, $dbBoxes, $requestBoxes);
             DB::commit();
         } catch (LogicException $exception) {
             DB::rollBack();
             // FIXME: is this the correct way to do this?
-            return redirect()->back()->withErrors(new MessageBag(['boxes.*.id' => $exception->getMessage()]));
+            return response($exception->getMessage(), 400)
+                ->back()
+                ->withErrors(new MessageBag(['boxes.*.id' => $exception->getMessage()]))
+                ->header('Content-Type', 'text/plain');
         } catch (Exception $exception) {
             // FIXME: is this the correct exception type?
             // FIXME: different exceptions for when retention request fails vs when box fails?
@@ -179,10 +217,17 @@ class RetentionRequestController extends Controller
         return response(['status' => 'success'], 200)->header('Content-Type', 'text/plain');
     }
 
+    private static function idValidator(string $id)
+    {
+        return Validator::make(['id' => $id], [
+            'id' => 'required|numeric|exists:retention_requests,id'
+        ]);
+    }
+
     // ASSUMES THAT THE ORIGINAL AND TARGET BOXES ARE ORDERED BY ID; THERE ISN'T NECESSARILY A 1-1 CORRESPONDENCE BETWEEN THE TWO
     // ASSUMES THAT THE ORIGINAL BOXES PARAMETER CONTAINS ALL THE BOXES IN THE DB FOR A RETENTION REQUEST
     // PRODUCES THE NEW NEXT UNIQUE TRACKING NUMBER, AFTER ALL DB BOXES HAVE BEEN ASSIGNED A UNIQUE TRACKING NUMBER
-    private static function updateBoxes($originalBoxes, $targetBoxes, $initNextTrackingNumber): int
+    private static function updateBoxes($originalBoxes, $targetBoxes, int|null $initNextTrackingNumber = null): int|null
     {
         $nextTrackingNumber = $initNextTrackingNumber;
         $targetBoxIndex = 0;
@@ -190,8 +235,11 @@ class RetentionRequestController extends Controller
 
         foreach ($originalBoxes as $originalBox) {
             $box = $originalBox->toArray();
-            $box['tracking_number'] = $nextTrackingNumber;
-            $nextTrackingNumber++;
+
+            if ($nextTrackingNumber !== null) {
+                $box['tracking_number'] = $nextTrackingNumber;
+                $nextTrackingNumber++;
+            }
 
             if ($targetBoxIndex < $targetBoxCount) {
                 if ($originalBox['id'] > $targetBoxes[$targetBoxIndex]['id'])
